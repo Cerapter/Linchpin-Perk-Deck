@@ -67,15 +67,15 @@ end
 
 function HUDCohesionDisplay:set_cohesion_value(new_amount)
     self:unhide()
-	--self._cohesion_panel:animate(callback(self, self, "change"), self.cohesion_count, new_amount)
+	self._cohesion_panel:animate(callback(self, self, "change"), self.cohesion_count, new_amount)
 
     self.cohesion_count = new_amount
-    local filled = math.floor(self.cohesion_count / (tweak_data.upgrades.linchpin_per_crew_member or 1))
-    local partial = self.cohesion_count - filled * (tweak_data.upgrades.linchpin_per_crew_member or 1)
-    local ratio = partial / (tweak_data.upgrades.linchpin_per_crew_member or 1)
+    -- local filled = math.floor(self.cohesion_count / (tweak_data.upgrades.linchpin_per_crew_member or 1))
+    -- local partial = self.cohesion_count - filled * (tweak_data.upgrades.linchpin_per_crew_member or 1)
+    -- local ratio = partial / (tweak_data.upgrades.linchpin_per_crew_member or 1)
 
-    self._cohesion_panel:child("cohesion_stacks"):set_text(tostring(filled))
-    self._cohesion_panel:child("cohesion_back"):set_color(Color(0.75, ratio, 1, 1))
+    -- self._cohesion_panel:child("cohesion_stacks"):set_text(tostring(filled))
+    -- self._cohesion_panel:child("cohesion_back"):set_color(Color(0.75, ratio, 1, 1))
 end
 
 
@@ -83,7 +83,7 @@ function HUDCohesionDisplay:change(input_panel, starting_amount, target_amount)
 	local per_cycle = tweak_data.upgrades.linchpin_per_crew_member or 8
 	local duration = tweak_data.upgrades.linchpin_change_t or 1
 	self._start_time = Application:time()
-	while true do
+	repeat
 		local cohesion_amount_ratio = math.min((Application:time() - self._start_time) / duration,1)
 		local current_amount = starting_amount + (target_amount - starting_amount) * cohesion_amount_ratio
 		local filled = math.floor(current_amount / per_cycle)
@@ -91,10 +91,7 @@ function HUDCohesionDisplay:change(input_panel, starting_amount, target_amount)
 
 		input_panel:child("cohesion_back"):set_color(Color(0.75, partial_ratio, 1, 1))
 		input_panel:child("cohesion_stacks"):set_text(tostring(filled))
-		if cohesion_amount_ratio == 1 then
-			break
-		end
 		coroutine.yield()
-	end
+	until cohesion_amount_ratio == 1
 	self._start_time = nil
 end

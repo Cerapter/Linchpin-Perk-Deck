@@ -1,0 +1,32 @@
+{
+	"name": "Linchpin Perk Deck",
+	"description": "Adds a Restoration Mod compatible perk deck.",
+	"author": "Cerapter",
+	"version": "1.0",
+	"blt_version": 2,
+    "dependencies" : {
+        "RestorationMod" : "https://modworkshop.net/mod/428"
+    },
+	"hooks": [
+		{
+			"hook_id" : "lib/tweak_data/skilltreetweakdata",
+			"script_path" : "src/skilltreetweakdata.lua"
+		},
+		{
+			"hook_id" : "lib/tweak_data/upgradestweakdata",
+			"script_path" : "src/upgradestweakdata.lua"
+		},
+		{
+			"hook_id" : "lib/managers/playermanager",
+			"script_path" : "src/playermanager.lua"
+		},
+		{
+			"hook_id" : "lib/units/beings/player/playerdamage",
+			"script_path" : "src/playerdamage.lua"
+		},
+		{
+			"hook_id" : "lib/network/handlers/unitnetworkhandler",
+			"script_path" : "src/unitnetworkhandler.lua"
+		}
+	]
+}

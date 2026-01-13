@@ -1,0 +1,5 @@
+<mod name="Linchpin Perk Deck" author="Cerapter">
+	<Localization directory="localisation" default="english.json">
+		<loc file="english.json" language="english" />
+	</Localization>
+</mod>

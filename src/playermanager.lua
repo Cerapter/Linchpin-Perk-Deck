@@ -54,9 +54,16 @@ end
 --- @param data SyncedLinchpinAuraData Cohesion stack data for the selected peer.
 --- @param affect_tendency boolean If true, also update the `to_tend` value.
 function PlayerManager:set_synced_cohesion_stacks(peer_id, data, affect_tendency)
+	local received_to_tend = 0
+	if affect_tendency and data.to_tend ~= nil then
+		received_to_tend = data.to_tend
+	elseif self._global.synced_cohesion_stacks[peer_id] ~= nil and self._global.synced_cohesion_stacks[peer_id].to_tend ~= nil then
+		received_to_tend = self._global.synced_cohesion_stacks[peer_id].to_tend
+	end
+
 	self._global.synced_cohesion_stacks[peer_id] = {
 		amount = data.amount,
-		to_tend = affect_tendency and data.to_tend or self._global.synced_cohesion_stacks[peer_id] and self._global.synced_cohesion_stacks[peer_id].to_tend or 0
+		to_tend = received_to_tend
 	}
 
 	-- TODO REMOVE DEBUG
@@ -68,7 +75,7 @@ function PlayerManager:set_synced_cohesion_stacks(peer_id, data, affect_tendency
 		tostring(peer_id) ..
 		' - Stacks: ' ..
 		tostring(data.amount) .. ' - Tendency: ' .. tostring(data.to_tend) .. ' (' .. tostring(affect_tendency) ..
-		')', Color.yellow)
+		') - Saved: '..tostring(received_to_tend), Color.yellow)
 end
 
 ---Iterates through all the synced Linchpin data, and picks out the highest suggested Cohesion stack count to tend to.
@@ -160,7 +167,7 @@ function PlayerManager:update_cohesion_stacks(t, dt)
 	local affected_players = {}
 
 	-- Linchpin users get to update their "suggested" tendency.
-	if self:upgrade_value("player", "linchpin_emit_aura", nil) then
+	if self:upgrade_value("player", "linchpin_emit_aura", 0) ~= 0 then
 		local heisters = World:find_units_quick("sphere", player_unit:position(),
 			tweak_data.upgrades.linchpin_proximity or 0, managers.slot:get_mask("all_criminals"))
 		for i, unit in ipairs(heisters) do

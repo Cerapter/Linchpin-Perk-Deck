@@ -66,7 +66,6 @@ Hooks:PostHook(PlayerDamage, "change_armor" , "linchpin_change_armor" , function
 	local cohesion_loss = 0
 
 	self._linchpin_damage_taken = self._linchpin_damage_taken - change * (tweak_data.upgrades.linchpin_damage_weighs_for_stack_loss.armour or 1) * 10
-	managers.chat:send_message(1, '[Linchpin]','Linchpin armour damage taken ' .. tostring(self._linchpin_damage_taken) .. '/' .. tostring(damage_bound), Color.yellow)
 
 	while self._linchpin_damage_taken > damage_bound do
 		cohesion_loss = cohesion_loss + 1
@@ -75,10 +74,8 @@ Hooks:PostHook(PlayerDamage, "change_armor" , "linchpin_change_armor" , function
 
 	if cohesion_loss > 0 then
 		local cohesion = managers.player:get_synced_cohesion_stacks(managers.network:session():local_peer():id())
-		managers.chat:send_message(1, '[Linchpin]','Cohesion loss from armour damage ' .. tostring(cohesion_loss) .. ' - sending ()' ..tostring(cohesion.amount) ..' or ' ..tostring(cohesion_loss)..') - '..tostring(cohesion_loss), Color.yellow)
-
 		managers.player:update_cohesion_stacks_for_peers({
-			amount = (cohesion.amount or cohesion_loss) - cohesion_loss, 
+			amount = math.max(0,(cohesion.amount or cohesion_loss) - cohesion_loss), 
 			to_tend = 99
 		}, {}, false)
 	end
@@ -94,7 +91,6 @@ Hooks:PostHook(PlayerDamage, "change_health" , "linchpin_change_health" , functi
 	local cohesion_loss = 0
 
 	self._linchpin_damage_taken = self._linchpin_damage_taken - change * (tweak_data.upgrades.linchpin_damage_weighs_for_stack_loss.health or 2) * 10
-	managers.chat:send_message(1, '[Linchpin]','Linchpin health damage taken ' .. tostring(self._linchpin_damage_taken) .. '/' .. tostring(damage_bound), Color.yellow)
 
 	while self._linchpin_damage_taken > damage_bound do
 		cohesion_loss = cohesion_loss + 1
@@ -103,10 +99,9 @@ Hooks:PostHook(PlayerDamage, "change_health" , "linchpin_change_health" , functi
 
 	if cohesion_loss > 0 then
 		local cohesion = managers.player:get_synced_cohesion_stacks(managers.network:session():local_peer():id())
-		managers.chat:send_message(1, '[Linchpin]','Cohesion loss from health damage ' .. tostring(cohesion_loss) .. ' - sending ()' ..tostring(cohesion.amount) ..' or ' ..tostring(cohesion_loss)..') - '..tostring(cohesion_loss), Color.yellow)
 
 		managers.player:update_cohesion_stacks_for_peers({
-			amount = (cohesion.amount or cohesion_loss) - cohesion_loss, 
+			amount = math.max(0,(cohesion.amount or cohesion_loss) - cohesion_loss),
 			to_tend = 99
 		}, {}, false)
 	end

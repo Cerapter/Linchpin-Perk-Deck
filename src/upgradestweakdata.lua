@@ -7,6 +7,11 @@ Hooks:PostHook(UpgradesTweakData, "_init_pd2_values", "linchpin_init", function(
     self.linchpin_per_crew_member = 8 -- The amount of Cohesion stacks per crew, used for tendency determination and "for every X" number.
     self.linchpin_change_t = 1 -- In seconds, how frequently do Cohesion stacks change.
     self.linchpin_hard_limit = 4 -- The maximum amount of players we'll ever consider for Cohesion counting. In case of Big Lobby mods, we shouldn't escalate to ridiculous amounts.
+	-- Represents 
+	self.linchpin_damage_weighs_for_stack_loss = {
+		health = 2,
+		armour = 1
+	}
 
     -- Cohesion stacks gained per second per crew member nearby.
     self.linchpin_gain = 1
@@ -22,6 +27,11 @@ Hooks:PostHook(UpgradesTweakData, "_init_pd2_values", "linchpin_init", function(
         true
     }
 
+	-- How much damage must be taken to lose a stack of Cohesion.
+	self.values.team.player.linchpin_damage_to_lose = {
+		16
+	}
+
     -- Healing potency increase from Stick Together, per crew member.
     self.values.team.player.linchpin_crew_heal_potency = {
         0.075
@@ -33,10 +43,10 @@ Hooks:PostHook(UpgradesTweakData, "_init_pd2_values", "linchpin_init", function(
     }
     self.crew_dodge_metre_fill_t = 1 -- In seconds, how frequently should the dodge meter be given.
 
-    -- Dodge points increased for the team per Cohesion.
+    -- Percentage value, the dodge points increases for the team per Cohesion.
     self.values.team.player.linchpin_crew_dodge_points = {
-        1.25,
-        2.5
+        0.0125,
+        0.025
     }
 
     -- Adds a fixed amount of Cohesion stacks to any effects that want Cohesion values specifically.
@@ -100,6 +110,16 @@ Hooks:PostHook(UpgradesTweakData, "_player_definitions", "linchpin_player_defini
 end)
 
 Hooks:PostHook(UpgradesTweakData, "_team_definitions", "linchpin_team_definitions", function(self)
+	-- Damage to take to lose Cohesion.
+    self.definitions.team_linchpin_damage_to_lose_1 = {
+		name_id = "menu_deck_linchpin_1",
+		category = "team",
+		upgrade = {
+			value = 1,
+			upgrade = "linchpin_damage_to_lose",
+			category = "player"
+		}
+	}
 
     -- Crew healing from Cohesion stacks.
     self.definitions.team_linchpin_crew_heal = {
@@ -137,7 +157,7 @@ Hooks:PostHook(UpgradesTweakData, "_team_definitions", "linchpin_team_definition
 		name_id = "menu_deck_linchpin_7",
 		category = "team",
 		upgrade = {
-			value = 1,
+			value = 2,
 			upgrade = "linchpin_crew_dodge_points",
 			category = "player"
 		}

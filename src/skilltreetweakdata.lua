@@ -49,6 +49,7 @@ Hooks:PostHook(SkillTreeTweakData, "init", "linchpin_init_skill_tree", function(
         {
             upgrades = {
                 "player_linchpin_aura",
+                "team_linchpin_damage_to_lose_1",
                 "player_passive_dodge_chance_1"
             },
             cost = cost(1),

@@ -20,6 +20,13 @@ Hooks:PostHook(PlayerManager, "update", "linchpin_playermanager_update", functio
 	self:update_cohesion_stacks(t, dt)
 end)
 
+Hooks:PostHook(PlayerManager, "skill_dodge_chance", "linchpin_playermanager_skill_dodge_chance", function(self, _, _, _, _, _)
+	local chance = Hooks:GetReturn()
+	local cohesion_stacks = self:get_cohesion_step(self:get_cohesion_stacks_as_treated()) or 0
+	chance = chance + self:team_upgrade_value("player", "linchpin_crew_dodge_points", 0) * cohesion_stacks
+	return chance
+end)
+
 --- Didn't necessarily have to be a separate function, but hey, Hysteria stacks did it this way, and when in Rome...
 --- Plus maybe it helps me not get lost in the sauce!
 --- @param peer_id integer Typically a number ranging from 1 to 4, literally just the player ID.
@@ -49,7 +56,7 @@ end
 function PlayerManager:set_synced_cohesion_stacks(peer_id, data, affect_tendency)
 	self._global.synced_cohesion_stacks[peer_id] = {
 		amount = data.amount,
-		to_tend = affect_tendency and data.to_tend or 0
+		to_tend = affect_tendency and data.to_tend or self._global.synced_cohesion_stacks[peer_id] and self._global.synced_cohesion_stacks[peer_id].to_tend or 0
 	}
 
 	-- TODO REMOVE DEBUG
@@ -104,16 +111,17 @@ end
 
 --- Updates the current player's Cohesion stacks for all players, and updates the Cohesion tendency suggested by the current player based on the affected parameter.
 --- @param data SyncedLinchpinAuraData See class for details.
---- @param affected boolean[] The table of unit IDs who are currently in the current player's Linchpin aura. Values don't matter, only indices. Can be empty.
-function PlayerManager:update_cohesion_stacks_for_peers(data, affected)
+--- @param affected boolean[] The table of unit IDs who are currently in the current player's Linchpin aura. Used for determining whose tendency numbers should be changed. Values don't matter, only indices. Can be empty.
+--- @param change_tendency boolean If true, tendency should be changed as well. If false, do not adjust it.
+function PlayerManager:update_cohesion_stacks_for_peers(data, affected, change_tendency)
 	local peer = managers.network:session():local_peer()
 	local is_affected = false
 	if peer and peer:unit() and peer:unit():id() then 
     	is_affected = affected[peer:unit():id()] ~= nil
 	end
 
-	managers.network:session():send_to_peers_synched("sync_cohesion_stacks", data, affected)
-	self:set_synced_cohesion_stacks(peer:id(), data, is_affected)
+	managers.network:session():send_to_peers_synched("sync_cohesion_stacks", data, affected, change_tendency)
+	self:set_synced_cohesion_stacks(peer:id(), data, is_affected and change_tendency)
 end
 
 --- Handles manipulating the Cohesion stack count.
@@ -122,8 +130,12 @@ end
 function PlayerManager:update_cohesion_stacks(t, dt)
 	local local_peer_id = managers.network:session() and managers.network:session():local_peer():id()
 	local player_unit = self:player_unit()
+	local keep_track_of_cohesion = self:has_team_category_upgrade("player", "linchpin_damage_to_lose")
 
-	if not local_peer_id or not player_unit then
+	if not local_peer_id or not player_unit or not keep_track_of_cohesion then
+		if managers.hud then
+			managers.hud:hide_cohesion_display()
+		end
 		return
 	end
 
@@ -135,6 +147,13 @@ function PlayerManager:update_cohesion_stacks(t, dt)
 
 	local to_tend = cohesion_stacks and cohesion_stacks.to_tend or 0
 	local new_to_tend = to_tend
+
+	-- Handle the HUD update.
+	self._cached_cohesion_amount = self._cached_cohesion_amount or 0
+	if self._cached_cohesion_amount ~= new_amount and managers.hud then
+		managers.hud:set_cohesion_value(new_amount)
+		self._cached_cohesion_amount = new_amount
+	end
 
 	--- The unit IDs of the affected players. Table index should be unit IDs, values don't matter.
 	--- @type boolean[]
@@ -169,6 +188,6 @@ function PlayerManager:update_cohesion_stacks(t, dt)
 		self:update_cohesion_stacks_for_peers({
 			amount = new_amount,
 			to_tend = new_to_tend
-		}, affected_players)
+		}, affected_players, true)
 	end
 end

@@ -7,9 +7,9 @@ Hooks:PostHook(HUDManager, "_setup_player_info_hud_pd2" , "linchpin_cohesion_hud
     self._cohesion_display = HUDCohesionDisplay:new((managers.hud:script(PlayerBase.PLAYER_INFO_HUD_PD2)))
 end)
 
-function HUDManager:set_cohesion_value(new_amount)
+function HUDManager:set_cohesion_value(new_amount, extra)
 	if self._cohesion_display then
-		self._cohesion_display:set_cohesion_value(new_amount)
+		self._cohesion_display:set_cohesion_value(new_amount, extra)
 	end
 end
 

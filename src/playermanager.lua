@@ -174,7 +174,7 @@ function PlayerManager:update_cohesion_stacks(t, dt)
 	-- Handle the HUD update.
 	self._cached_cohesion_amount = self._cached_cohesion_amount or 0
 	if self._cached_cohesion_amount ~= new_amount and managers.hud then
-		managers.hud:set_cohesion_value(new_amount)
+		managers.hud:set_cohesion_value(new_amount, self:upgrade_value("player", "linchpin_treat_as_more_cohesion", 0))
 		self._cached_cohesion_amount = new_amount
 	end
 

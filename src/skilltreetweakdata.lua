@@ -56,6 +56,7 @@ Hooks:PostHook(SkillTreeTweakData, "init", "linchpin_init_skill_tree", function(
             icon_xy = { 4, 2 },
             name_id = "menu_deck_linchpin_1",
             desc_id = "menu_deck_linchpin_1_desc",
+            short_id = "menu_deck_linchpin_1_short",
             multi_choice = {
                 {
                     name_id = "menu_deck_linchpin_1_1",
@@ -101,7 +102,7 @@ Hooks:PostHook(SkillTreeTweakData, "init", "linchpin_init_skill_tree", function(
                     short_id = "menu_deck_linchpin_3_1_desc",
                     icon_atlas = "icons_atlas",
                     upgrades = {
-                        "player_treat_as_more_cohesion"
+                        "player_linchpin_treat_as_more_cohesion"
                     },
                     icon_xy = {
                         2,
@@ -114,8 +115,8 @@ Hooks:PostHook(SkillTreeTweakData, "init", "linchpin_init_skill_tree", function(
                     short_id = "menu_deck_linchpin_3_2_desc",
                     icon_atlas = "icons_atlas",
                     upgrades = {
-                        "player_gain_speed_up",
-                        "player_loss_speed_down"
+                        "player_linchpin_gain_speed_up",
+                        "player_linchpin_loss_speed_down"
                     },
                     icon_xy = {
                         4,
@@ -127,7 +128,7 @@ Hooks:PostHook(SkillTreeTweakData, "init", "linchpin_init_skill_tree", function(
         shared_cards[2],
         {
             upgrades = {
-                -- TODO
+                "player_passive_dodge_chance_2"
             },
             cost = cost(5),
             icon_xy = { 3, 0 },
@@ -140,7 +141,7 @@ Hooks:PostHook(SkillTreeTweakData, "init", "linchpin_init_skill_tree", function(
                     short_id = "menu_deck_linchpin_5_1_desc",
                     icon_atlas = "icons_atlas",
                     upgrades = {
-                        -- TODO
+                        "team_linchpin_crew_movespeed_bonus"
                     },
                     icon_xy = {
                         1,
@@ -153,7 +154,7 @@ Hooks:PostHook(SkillTreeTweakData, "init", "linchpin_init_skill_tree", function(
                     short_id = "menu_deck_linchpin_5_2_desc",
                     icon_atlas = "icons_atlas",
                     upgrades = {
-                        -- TODO
+                        "team_linchpin_crew_reload_bonus"
                     },
                     icon_xy = {
                         7,

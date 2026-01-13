@@ -4,6 +4,7 @@
 
     "menu_deck_linchpin_1": "Tight Formation",
     "menu_deck_linchpin_1_desc": "You and your crew (henceforth \"crew members\") may gain Cohesion stacks. Cohesion stacks tend to a number equal to 8 times the amount of crew members nearby for each crew member, but only as long as they are within #{skill_color}#18## metres of you and you are not downed. This means that if their Cohesion stacks are below this amount, they gain #{skill_color}#1## Cohesion stack every second, but lose #{important_1}#2## Cohesion stacks every second otherwise. This tendency grows faster the farther away a crew member's Cohesion stacks are from the target amount.\nCrew members lose #{important_1}#1## Cohesion stack for every #{skill_color}#16## damage taken, with health damage weighed doubly.\n\n#{risk}#NOTE: Perk benefits do not stack if mulitple Linchpin users select the same, and Cohesion stacks are not gained faster from multiple Linchpin users nearby. If multiple Linchpin users near one another have would have their Cohesion stacks tend to different amount, the higher one wins.##\n\nYour dodge is increased by #{skill_color}#5## points.",
+    "menu_deck_linchpin_1_short": "You and your crew (henceforth \"crew members\") may gain Cohesion stacks. Cohesion stacks tend to a number equal to 8 times the amount of crew members nearby for each crew member, but only as long as they are within #{skill_color}#18## metres of you and you are not downed. This tendency grows faster the farther away a crew member's Cohesion stacks are from the target amount.\nCrew members lose #{important_1}#1## Cohesion stack for every #{skill_color}#16## damage taken, with health damage weighed doubly.\n\nYour dodge is increased by #{skill_color}#5## points.",
     "menu_deck_linchpin_1_1": "Stick Together!",
     "menu_deck_linchpin_1_1_desc": "Healing that crew members receive is #{skill_color}#+7.5%## more potent for every 8 stacks of Cohesion they have.",
     "menu_deck_linchpin_1_2": "Eyes Open!",
@@ -29,7 +30,7 @@
     "menu_deck_linchpin_7_1_desc": "You gain #{skill_color}#24## Cohesion stacks when you are revived.",
     "menu_deck_linchpin_7_2": "Earn Your Keep!",
     "menu_deck_linchpin_7_2_desc": "You and any crew members nearby gain #{skill_color}#1## Cohesion stack when you perform a kill.\nThis effect stacks with other Linchpin users who have this card selected.\n\n#{risk}#NOTE: Cohesion stacks gained this way cannot increase a crew members' Cohesion stacks beyond the amount it would tend to normally.##",
-
+    
     "menu_deck_linchpin_9": "Ironclad Formation",
     "menu_deck_linchpin_9_desc": "Crew members' Cohesion stacks now tend to #{skill_color}#8 + 8 times the amount of crew members nearby.##\n\nDeck Completion Bonus: Your chance of getting a higher quality item during a PAYDAY is increased by #{skill_color}#10%.##",
     "menu_deck_linchpin_9_1": "Dig In Your Heels!",

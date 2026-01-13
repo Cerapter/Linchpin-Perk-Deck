@@ -20,11 +20,27 @@ Hooks:PostHook(PlayerManager, "update", "linchpin_playermanager_update", functio
 	self:update_cohesion_stacks(t, dt)
 end)
 
+--- For dodge point determination. Adds a specific amount of dodge based on Cohesion stacks.
+--- The "other half" of this implementation is in the PlayerDamage:update() hook in playerdamage.lua.
 Hooks:PostHook(PlayerManager, "skill_dodge_chance", "linchpin_playermanager_skill_dodge_chance", function(self, _, _, _, _, _)
 	local chance = Hooks:GetReturn()
 	local cohesion_stacks = self:get_cohesion_step(self:get_cohesion_stacks_as_treated()) or 0
 	chance = chance + self:team_upgrade_value("player", "linchpin_crew_dodge_points", 0) * cohesion_stacks
 	return chance
+end)
+
+
+Hooks:PostHook(PlayerManager, "movement_speed_multiplier", "linchpin_playermanager_movement_speed_multiplier", function(self, _, _, _, _)
+	local multiplier = Hooks:GetReturn()
+
+    if self:has_team_category_upgrade("player", "linchpin_crew_movespeed_bonus") then
+		local cohesion_stacks = self:get_cohesion_stacks_as_treated()
+		local potency_amount = self:get_cohesion_step(cohesion_stacks)
+
+		multiplier = multiplier + self:team_upgrade_value("player", "linchpin_crew_movespeed_bonus", 0) * potency_amount
+	end
+
+	return multiplier
 end)
 
 --- Didn't necessarily have to be a separate function, but hey, Hysteria stacks did it this way, and when in Rome...

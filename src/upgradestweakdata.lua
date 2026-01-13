@@ -63,6 +63,16 @@ Hooks:PostHook(UpgradesTweakData, "_init_pd2_values", "linchpin_init", function(
     self.values.player.linchpin_loss_change = {
         0.5
     }
+
+    -- Percentage value, the movespeed increases for the team per Cohesion.
+    self.values.team.player.linchpin_crew_movespeed_bonus = {
+        0.05
+    }
+
+    -- Percentage value, the movespeed increases for the team per Cohesion.
+    self.values.team.player.linchpin_crew_reload_bonus = {
+        0.05
+    }
 end)
 
 Hooks:PostHook(UpgradesTweakData, "_player_definitions", "linchpin_player_definitions", function(self)
@@ -78,7 +88,7 @@ Hooks:PostHook(UpgradesTweakData, "_player_definitions", "linchpin_player_defini
 	}
 
     -- Treats the user as having more Cohesion for effects.
-    self.definitions.player_treat_as_more_cohesion = {
+    self.definitions.player_linchpin_treat_as_more_cohesion = {
 		name_id = "menu_deck_linchpin_3_1",
 		category = "feature",
 		upgrade = {
@@ -89,7 +99,7 @@ Hooks:PostHook(UpgradesTweakData, "_player_definitions", "linchpin_player_defini
 	}
 
     -- Doubles gain, halves loss
-    self.definitions.player_gain_speed_up = {
+    self.definitions.player_linchpin_gain_speed_up = {
 		name_id = "menu_deck_linchpin_3_2",
 		category = "feature",
 		upgrade = {
@@ -98,7 +108,7 @@ Hooks:PostHook(UpgradesTweakData, "_player_definitions", "linchpin_player_defini
 			category = "player"
 		}
 	}
-    self.definitions.player_loss_speed_down = {
+    self.definitions.player_linchpin_loss_speed_down = {
 		name_id = "menu_deck_linchpin_3_2",
 		category = "feature",
 		upgrade = {
@@ -159,6 +169,28 @@ Hooks:PostHook(UpgradesTweakData, "_team_definitions", "linchpin_team_definition
 		upgrade = {
 			value = 2,
 			upgrade = "linchpin_crew_dodge_points",
+			category = "player"
+		}
+	}
+
+    -- Crew movespeed increase from Cohesion stacks.
+    self.definitions.team_linchpin_crew_movespeed_bonus = {
+		name_id = "menu_deck_linchpin_5_1",
+		category = "team",
+		upgrade = {
+			value = 1,
+			upgrade = "linchpin_crew_movespeed_bonus",
+			category = "player"
+		}
+	}
+
+    -- Crew reload speed increase from Cohesion stacks.
+    self.definitions.team_linchpin_crew_reload_bonus = {
+		name_id = "menu_deck_linchpin_5_1",
+		category = "team",
+		upgrade = {
+			value = 1,
+			upgrade = "linchpin_crew_reload_bonus",
 			category = "player"
 		}
 	}

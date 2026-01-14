@@ -179,7 +179,7 @@ Hooks:PostHook(SkillTreeTweakData, "init", "linchpin_init_skill_tree", function(
                     short_id = "menu_deck_linchpin_7_1_desc",
                     icon_atlas = "icons_atlas",
                     upgrades = {
-                        -- TODO
+                        "player_linchpin_stacks_on_revive"
                     },
                     icon_xy = {
                         1,
@@ -189,10 +189,10 @@ Hooks:PostHook(SkillTreeTweakData, "init", "linchpin_init_skill_tree", function(
                 {
                     name_id = "menu_deck_linchpin_7_2",
                     desc_id = "menu_deck_linchpin_7_2_desc",
-                    short_id = "menu_deck_linchpin_7_2_desc",
+                    short_id = "menu_deck_linchpin_7_2_short",
                     icon_atlas = "icons_atlas",
                     upgrades = {
-                        -- TODO
+                        "player_linchpin_personal_kill_stack_reward"
                     },
                     icon_xy = {
                         3,

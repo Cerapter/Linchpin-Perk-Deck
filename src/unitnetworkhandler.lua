@@ -26,3 +26,21 @@ function UnitNetworkHandler:sync_cohesion_stacks(data, affected, change_tendency
 	managers.chat:send_message(1, '[Linchpin]','SYNCING', Color.yellow)
 	managers.player:set_synced_cohesion_stacks(peer_id, checked_cohesion_data, is_affected and change_tendency)
 end
+
+--- Tells peers to give themselves Cohesion stacks.
+--- @param amount integer See PlayerManager:add_cohesion_stacks().
+--- @param go_over_tendency boolean See PlayerManager:add_cohesion_stacks().
+--- @param affected boolean[] The table of unit IDs whose players should do the addition. Indices matter more than content here.
+--- @param sender Peer See my comments at sync_cohesion_stacks().
+function UnitNetworkHandler:sync_add_cohesion_stacks(amount, go_over_tendency, affected, sender)
+	local peer = self._verify_sender(sender)
+
+	if not self._verify_gamestate(self._gamestate_filter.any_ingame) or not peer then
+		return
+	end
+
+    local peer_unit = peer:unit()
+    if  affected[peer_unit] ~= nil then
+		managers.player:add_cohesion_stacks(amount, go_over_tendency)
+	end
+end

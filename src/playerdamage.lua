@@ -2,6 +2,14 @@ if not restoration then
 	return
 end
 
+Hooks:PostHook(PlayerDamage, "_init_standard_listeners" , "linchpin_playerdamage_init_standard_listeners" , function(self, unit)
+	if managers.player:has_category_upgrade("player", "linchpin_stacks_on_revive") then
+		self._listener_holder:add("_linchpin_revive_with_stacks", {
+			"on_revive"
+		}, callback(self, self, "_on_linchpin_revive_with_stacks"))
+	end
+end)
+
 -- Copied over from Resmod, but added Linchpin's healing potency change too.
 Hooks:OverrideFunction(PlayerDamage,"restore_health", function(self, health_restored, is_static, chk_health_ratio)
 	if chk_health_ratio and managers.player:is_damage_health_ratio_active(self:health_ratio()) and not self:is_downed() then
@@ -14,8 +22,6 @@ Hooks:OverrideFunction(PlayerDamage,"restore_health", function(self, health_rest
 		local potency_amount = managers.player:get_cohesion_step(cohesion_stacks)
 
 		linchpin_healing_potency = 1 + managers.player:team_upgrade_value("player", "linchpin_crew_heal_potency", 0) * potency_amount
-
-		managers.player:set_damage_absorption("hostage_absorption", absorption)
 	end
 
 	if is_static then
@@ -27,7 +33,7 @@ Hooks:OverrideFunction(PlayerDamage,"restore_health", function(self, health_rest
 	end
 end)
 
-Hooks:PostHook(PlayerDamage, "update" , "linchpin_dodge_updates" , function(self, unit, t, dt)
+Hooks:PostHook(PlayerDamage, "update" , "linchpin_dodge_updates" , function(self, _, t, dt)
 	local cohesion_stacks = managers.player:get_cohesion_stacks_as_treated()
 	local cohesion_steps = managers.player:get_cohesion_step(cohesion_stacks) -- Most things use the steps (i.e., they say "for every X stacks") so yeah, might as well determine this ahead of time.
 
@@ -56,6 +62,7 @@ Hooks:PostHook(PlayerDamage, "update" , "linchpin_dodge_updates" , function(self
 	end
 end)
 
+-- This is probably not the best way to handle this. I could have done the "orig_X" thing I did with armour regen, but I wanted to do function replacements that large as little as possible.
 Hooks:PostHook(PlayerDamage, "change_armor" , "linchpin_change_armor" , function(self, change)
 	if change >= 0 or not managers.player:has_team_category_upgrade("player", "linchpin_damage_to_lose") then
 		return
@@ -76,11 +83,12 @@ Hooks:PostHook(PlayerDamage, "change_armor" , "linchpin_change_armor" , function
 		local cohesion = managers.player:get_synced_cohesion_stacks(managers.network:session():local_peer():id())
 		managers.player:update_cohesion_stacks_for_peers({
 			amount = math.max(0,(cohesion.amount or cohesion_loss) - cohesion_loss), 
-			to_tend = 99
+			to_tend = nil
 		}, {}, false)
 	end
 end)
 
+-- See my change_armor comments.
 Hooks:PostHook(PlayerDamage, "change_health" , "linchpin_change_health" , function(self, change)
 	if change >= 0 or not managers.player:has_team_category_upgrade("player", "linchpin_damage_to_lose") then
 		return
@@ -102,7 +110,24 @@ Hooks:PostHook(PlayerDamage, "change_health" , "linchpin_change_health" , functi
 
 		managers.player:update_cohesion_stacks_for_peers({
 			amount = math.max(0,(cohesion.amount or cohesion_loss) - cohesion_loss),
-			to_tend = 99
+			to_tend = nil
 		}, {}, false)
 	end
 end)
+
+--- For Back To It! stack-gain-on-revive mechanics.
+function PlayerDamage:_on_linchpin_revive_with_stacks()
+	local stacks = managers.player:upgrade_value("player", "linchpin_stacks_on_revive", 0)
+	if stacks and stacks > 0 then
+		managers.player:update_cohesion_stacks_for_peers({
+			amount = stacks,
+			to_tend = nil
+		}, {}, false)
+	end
+end
+
+-- Risky business!
+local orig_update_regenerate_timer = PlayerDamage._update_regenerate_timer
+function PlayerDamage:_update_regenerate_timer(...)
+	orig_update_regenerate_timer(self,...)
+end

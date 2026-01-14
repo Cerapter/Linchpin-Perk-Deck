@@ -2,6 +2,11 @@ if not restoration then
     return
 end
 
+--- ## FOR DEBUGGING PURPOSES ONLY, SET TO 1 FOR RELEASE
+--- Simply multiplies most effect numbers by this number, for easier visibility on changes.
+--- (Primarily for testing stack numbers between clients because I apparently suck at networking.)
+LINCHPIN_DEBUGNUMBERS = 4
+
 Hooks:PostHook(UpgradesTweakData, "_init_pd2_values", "linchpin_init", function(self)
     self.linchpin_proximity = 1800 -- Centimetres proximity required to gain Cohesion stacks.
     self.linchpin_per_crew_member = 8 -- The amount of Cohesion stacks per crew, used for tendency determination and "for every X" number.
@@ -19,9 +24,6 @@ Hooks:PostHook(UpgradesTweakData, "_init_pd2_values", "linchpin_init", function(
     -- Cohesion stacks lost per second when trending downwards.
     self.linchpin_loss = 2
 
-    -- Should be set to 1 if the heister is near ANY crew member with the Linchpin perk deck.
-    self.values.temporary.linchpin_within_range = 0
-
     -- Sets up the 18 metre radius Cohesion stack gaining aura.
     self.values.player.linchpin_emit_aura = {
         true
@@ -34,19 +36,19 @@ Hooks:PostHook(UpgradesTweakData, "_init_pd2_values", "linchpin_init", function(
 
     -- Healing potency increase from Stick Together, per crew member.
     self.values.team.player.linchpin_crew_heal_potency = {
-        0.075
+        0.075 * LINCHPIN_DEBUGNUMBERS
     }
 
     -- Dodge metre increase per second from Eyes Open, percentage value.
     self.values.team.player.linchpin_crew_dodge_metre_fill = {
-        0.025
+        0.025 * LINCHPIN_DEBUGNUMBERS
     }
     self.crew_dodge_metre_fill_t = 1 -- In seconds, how frequently should the dodge meter be given.
 
     -- Percentage value, the dodge points increases for the team per Cohesion.
     self.values.team.player.linchpin_crew_dodge_points = {
-        0.0125,
-        0.025
+        0.0125 * LINCHPIN_DEBUGNUMBERS,
+        0.025 * LINCHPIN_DEBUGNUMBERS
     }
 
     -- Adds a fixed amount of Cohesion stacks to any effects that want Cohesion values specifically.
@@ -66,12 +68,25 @@ Hooks:PostHook(UpgradesTweakData, "_init_pd2_values", "linchpin_init", function(
 
     -- Percentage value, the movespeed increases for the team per Cohesion.
     self.values.team.player.linchpin_crew_movespeed_bonus = {
-        0.05
+        0.05 * LINCHPIN_DEBUGNUMBERS
     }
 
     -- Percentage value, the movespeed increases for the team per Cohesion.
     self.values.team.player.linchpin_crew_reload_bonus = {
-        0.05
+        0.05 * LINCHPIN_DEBUGNUMBERS
+    }
+
+    -- How many Cohesion stacks should be gained on revive with Back To It!.
+    self.values.player.linchpin_stacks_on_revive = {
+        48
+    }
+
+    -- How many Cohesion stacks should everyone nearby gain when you kill X amount of enemies.
+    self.values.player.linchpin_personal_kill_stack_reward = {
+        {
+			enemies = 1,
+			stacks = 1
+		}
     }
 end)
 
@@ -114,6 +129,28 @@ Hooks:PostHook(UpgradesTweakData, "_player_definitions", "linchpin_player_defini
 		upgrade = {
 			value = 1,
 			upgrade = "linchpin_loss_change",
+			category = "player"
+		}
+	}
+
+    -- Cohesion stacks on revive.
+    self.definitions.player_linchpin_stacks_on_revive = {
+		name_id = "menu_deck_linchpin_7_1",
+		category = "feature",
+		upgrade = {
+			value = 1,
+			upgrade = "linchpin_stacks_on_revive",
+			category = "player"
+		}
+	}
+
+    -- Cohesion stacks on kills.
+    self.definitions.player_linchpin_personal_kill_stack_reward = {
+		name_id = "menu_deck_linchpin_7_1",
+		category = "feature",
+		upgrade = {
+			value = 1,
+			upgrade = "linchpin_personal_kill_stack_reward",
 			category = "player"
 		}
 	}

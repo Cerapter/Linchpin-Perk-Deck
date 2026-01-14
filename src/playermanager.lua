@@ -43,6 +43,35 @@ Hooks:PostHook(PlayerManager, "movement_speed_multiplier", "linchpin_playermanag
 	return multiplier
 end)
 
+Hooks:PostHook(PlayerManager,"check_skills","linchpin_playermanager_check_skills",function(self)
+	if self:has_category_upgrade("player", "linchpin_personal_kill_stack_reward") then
+		self._linchpin_personal_target_kills = self:upgrade_value("player", "linchpin_personal_kill_stack_reward").enemies
+		self._linchpin_personal_target_rewards = self:upgrade_value("player", "linchpin_personal_kill_stack_reward").stacks
+
+		self._message_system:register(Message.OnEnemyKilled, "linchpin_personal_give_nearby_crewmembers_stacks", callback(self, self, "_linchpin_on_personal_kill"))
+	else
+		self._linchpin_personal_target_kills = 0
+		self._linchpin_personal_target_rewards = 0
+		self._message_system:unregister(Message.OnEnemyKilled, "linchpin_personal_give_nearby_crewmembers_stacks")
+	end
+end)
+
+function PlayerManager:_linchpin_on_personal_kill(_, _, _)
+	local player_unit = self:player_unit()
+	if self._num_kills % self._linchpin_personal_target_kills == 0 and player_unit ~= nil then
+		local affected_players = {}
+		local heisters = World:find_units_quick("sphere", player_unit:position(),
+			tweak_data.upgrades.linchpin_proximity or 0, managers.slot:get_mask("all_criminals"))
+		
+		for i, unit in ipairs(heisters) do
+			affected_players[unit:id()] = true
+		end
+
+		managers.network:session():send_to_peers_synched("sync_add_cohesion_stacks", self._linchpin_personal_target_rewards, false, affected_players)
+		managers.player:add_cohesion_stacks(self._linchpin_personal_target_rewards, false)
+	end
+end
+
 --- Didn't necessarily have to be a separate function, but hey, Hysteria stacks did it this way, and when in Rome...
 --- Plus maybe it helps me not get lost in the sauce!
 --- @param peer_id integer Typically a number ranging from 1 to 4, literally just the player ID.
@@ -145,6 +174,32 @@ function PlayerManager:update_cohesion_stacks_for_peers(data, affected, change_t
 
 	managers.network:session():send_to_peers_synched("sync_cohesion_stacks", data, affected, change_tendency)
 	self:set_synced_cohesion_stacks(peer:id(), data, is_affected and change_tendency)
+end
+
+--- A simplified function that simply just adds an amount to the Cohesion stacks. It then synchronises the changes to the other clients.
+--- @param amount number The amount that should be added to the Cohesion stacks.
+--- @param go_over_tendency boolean If true, the final Cohesion stack count can go over the tendency.
+function PlayerManager:add_cohesion_stacks(amount, go_over_tendency)
+	local local_peer_id = managers.network:session() and managers.network:session():local_peer():id()
+
+	if not local_peer_id then
+		return
+	end
+
+	local data = self:get_synced_cohesion_stacks(local_peer_id)
+	local new_amount = data.amount + amount
+
+	if not go_over_tendency then
+		-- While I don't want it going over the tendency if the option is off, I DO want to keep any amount that already existed (in case you just ran out of a Linchpin aura, for example).
+		new_amount = math.max(math.min(new_amount, data.to_tend), data.amount)
+	end
+
+	if new_amount ~= data.amount then
+		managers.player:update_cohesion_stacks_for_peers({
+			amount = new_amount,
+			to_tend = nil
+		}, {}, false)
+	end
 end
 
 --- Handles manipulating the Cohesion stack count.

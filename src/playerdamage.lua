@@ -33,7 +33,7 @@ Hooks:OverrideFunction(PlayerDamage,"restore_health", function(self, health_rest
 	end
 end)
 
-Hooks:PostHook(PlayerDamage, "update" , "linchpin_dodge_updates" , function(self, _, t, dt)
+Hooks:PostHook(PlayerDamage, "update" , "linchpin_playerdamage_update" , function(self, _, t, dt)
 	local cohesion_stacks = managers.player:get_cohesion_stacks_as_treated()
 	local cohesion_steps = managers.player:get_cohesion_step(cohesion_stacks) -- Most things use the steps (i.e., they say "for every X stacks") so yeah, might as well determine this ahead of time.
 
@@ -55,10 +55,22 @@ Hooks:PostHook(PlayerDamage, "update" , "linchpin_dodge_updates" , function(self
 	-- Eyes Open!
 
 	self._eyes_open_t = self._eyes_open_t or t + (tweak_data.upgrades.crew_dodge_metre_fill_t or 1)
-
 	if self._eyes_open_t <= t then
 		self._eyes_open_t = t + (tweak_data.upgrades.crew_dodge_metre_fill_t or 1)
-		self:fill_dodge_meter(self._dodge_points * dt * managers.player:team_upgrade_value("player", "linchpin_crew_dodge_metre_fill", 0) * cohesion_steps) 
+		local linchpin_dodge_meter_bonus = managers.player:team_upgrade_value("player", "linchpin_crew_dodge_metre_fill", 0) + managers.player:team_upgrade_value("player", "linchpin_crew_dodge_metre_fill_2", 0)
+		self:fill_dodge_meter(self._dodge_points * dt * linchpin_dodge_meter_bonus * cohesion_steps)
+	end
+
+	-- Dig In Your Heels! healing.
+	-- Yes, I know heal-over-time has its own function, but again, seems risky to overwrite.
+
+	if managers.player:has_team_category_upgrade("player", "linchpin_regen_health") then
+		self._linchpin_regen_t = self._linchpin_regen_t or t + (managers.player:team_upgrade_value("player", "linchpin_regen_health").seconds or 5)
+		if self._linchpin_regen_t <= t then
+			self._linchpin_regen_t = t + (managers.player:team_upgrade_value("player", "linchpin_regen_health").seconds or 5)
+			local heal =(managers.player:team_upgrade_value("player", "linchpin_regen_health").amount or 0) * cohesion_steps
+			self:restore_health(heal, true)
+		end
 	end
 end)
 
@@ -128,6 +140,18 @@ end
 
 -- Risky business!
 local orig_update_regenerate_timer = PlayerDamage._update_regenerate_timer
-function PlayerDamage:_update_regenerate_timer(...)
-	orig_update_regenerate_timer(self,...)
+function PlayerDamage:_update_regenerate_timer(t, dt)
+	orig_update_regenerate_timer(self, t, dt)
+
+	if managers.player:has_team_category_upgrade("player", "linchpin_armour_regen_bonus") then
+		local cohesion_stacks = managers.player:get_cohesion_stacks_as_treated()
+		local cohesion_steps = managers.player:get_cohesion_step(cohesion_stacks)
+		local extra_regen_timer_tick = managers.player:team_upgrade_value("player", "linchpin_armour_regen_bonus", 0) * cohesion_steps
+		local regenerate_timer_tick = dt * (self._regenerate_speed or 1) * extra_regen_timer_tick
+		self._regenerate_timer = math.max(self._regenerate_timer - regenerate_timer_tick, 0)
+
+		if self._regenerate_timer <= 0 then
+			self:_regenerate_armor()
+		end
+	end
 end

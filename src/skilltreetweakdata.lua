@@ -64,7 +64,7 @@ Hooks:PostHook(SkillTreeTweakData, "init", "linchpin_init_skill_tree", function(
                     short_id = "menu_deck_linchpin_1_1_desc",
                     icon_atlas = "icons_atlas",
                     upgrades = {
-                        "team_linchpin_crew_heal"
+                        "team_linchpin_crew_heal_potency"
                     },
                     icon_xy = {
                         0,
@@ -204,7 +204,8 @@ Hooks:PostHook(SkillTreeTweakData, "init", "linchpin_init_skill_tree", function(
         shared_cards[4],
         {
             upgrades = {
-                -- TODO
+                "player_passive_loot_drop_multiplier_1",
+                "team_linchpin_increase_default_tendency"
             },
             cost = cost(9),
             icon_xy = { 6, 4 },
@@ -217,7 +218,8 @@ Hooks:PostHook(SkillTreeTweakData, "init", "linchpin_init_skill_tree", function(
                     short_id = "menu_deck_linchpin_9_1_desc",
                     icon_atlas = "icons_atlas",
                     upgrades = {
-                        -- TODO
+                        "team_linchpin_damage_to_lose_2",
+                        "team_linchpin_regen_health"
                     },
                     icon_xy = {
                         4,
@@ -230,7 +232,8 @@ Hooks:PostHook(SkillTreeTweakData, "init", "linchpin_init_skill_tree", function(
                     short_id = "menu_deck_linchpin_9_2_desc",
                     icon_atlas = "icons_atlas",
                     upgrades = {
-                        -- TODO
+                        "team_linchpin_crew_dodge_metre_fill_2",
+                        "team_linchpin_armour_regen_bonus"
                     },
                     icon_xy = {
                         0,
@@ -243,7 +246,8 @@ Hooks:PostHook(SkillTreeTweakData, "init", "linchpin_init_skill_tree", function(
                     short_id = "menu_deck_linchpin_9_3_desc",
                     icon_atlas = "icons_atlas",
                     upgrades = {
-                        -- TODO
+                        "team_linchpin_stamina_regen_bonus",
+                        "team_linchpin_additional_move_reload_bonus"
                     },
                     icon_xy = {
                         2,
@@ -253,10 +257,10 @@ Hooks:PostHook(SkillTreeTweakData, "init", "linchpin_init_skill_tree", function(
                 {
                     name_id = "menu_deck_linchpin_9_4",
                     desc_id = "menu_deck_linchpin_9_4_desc",
-                    short_id = "menu_deck_linchpin_9_4_desc",
+                    short_id = "menu_deck_linchpin_9_4_short",
                     icon_atlas = "icons_atlas",
                     upgrades = {
-                        -- TODO
+                        "team_linchpin_crew_kill_stack_reward"
                     },
                     icon_xy = {
                         3,

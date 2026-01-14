@@ -36,14 +36,16 @@ Hooks:PostHook(PlayerManager, "movement_speed_multiplier", "linchpin_playermanag
     if self:has_team_category_upgrade("player", "linchpin_crew_movespeed_bonus") then
 		local cohesion_stacks = self:get_cohesion_stacks_as_treated()
 		local potency_amount = self:get_cohesion_step(cohesion_stacks)
+		local bonus = self:team_upgrade_value("player", "linchpin_crew_movespeed_bonus", 0) + self:team_upgrade_value("player", "linchpin_additional_move_reload_bonus", 0)
 
-		multiplier = multiplier + self:team_upgrade_value("player", "linchpin_crew_movespeed_bonus", 0) * potency_amount
+		multiplier = multiplier + bonus * potency_amount
 	end
 
 	return multiplier
 end)
 
 Hooks:PostHook(PlayerManager,"check_skills","linchpin_playermanager_check_skills",function(self)
+	-- Earn Your Keep!
 	if self:has_category_upgrade("player", "linchpin_personal_kill_stack_reward") then
 		self._linchpin_personal_target_kills = self:upgrade_value("player", "linchpin_personal_kill_stack_reward").enemies
 		self._linchpin_personal_target_rewards = self:upgrade_value("player", "linchpin_personal_kill_stack_reward").stacks
@@ -53,6 +55,18 @@ Hooks:PostHook(PlayerManager,"check_skills","linchpin_playermanager_check_skills
 		self._linchpin_personal_target_kills = 0
 		self._linchpin_personal_target_rewards = 0
 		self._message_system:unregister(Message.OnEnemyKilled, "linchpin_personal_give_nearby_crewmembers_stacks")
+	end
+
+	-- Press The Advantage!
+	if self:has_team_category_upgrade("player", "linchpin_crew_kill_stack_reward") then
+		self._linchpin_crew_target_kills = self:team_upgrade_value("player", "linchpin_crew_kill_stack_reward").enemies
+		self._linchpin_crew_target_rewards = self:team_upgrade_value("player", "linchpin_crew_kill_stack_reward").stacks
+
+		self._message_system:register(Message.OnEnemyKilled, "linchpin_crew_give_nearby_crewmembers_stacks", callback(self, self, "_linchpin_on_crew_kill"))
+	else
+		self._linchpin_crew_target_kills = 0
+		self._linchpin_crew_target_rewards = 0
+		self._message_system:unregister(Message.OnEnemyKilled, "linchpin_crew_give_nearby_crewmembers_stacks")
 	end
 end)
 
@@ -69,6 +83,22 @@ function PlayerManager:_linchpin_on_personal_kill(_, _, _)
 
 		managers.network:session():send_to_peers_synched("sync_add_cohesion_stacks", self._linchpin_personal_target_rewards, false, affected_players)
 		managers.player:add_cohesion_stacks(self._linchpin_personal_target_rewards, false)
+	end
+end
+
+function PlayerManager:_linchpin_on_crew_kill(_, _, _)
+	local player_unit = self:player_unit()
+	if self._num_kills % self._linchpin_crew_target_kills == 0 and player_unit ~= nil then
+		local affected_players = {}
+		local heisters = World:find_units_quick("sphere", player_unit:position(),
+			tweak_data.upgrades.linchpin_proximity or 0, managers.slot:get_mask("all_criminals"))
+		
+		for i, unit in ipairs(heisters) do
+			affected_players[unit:id()] = true
+		end
+
+		managers.network:session():send_to_peers_synched("sync_add_cohesion_stacks", self._linchpin_crew_target_rewards, true, affected_players)
+		managers.player:add_cohesion_stacks(self._linchpin_crew_target_rewards, true)
 	end
 end
 
@@ -251,7 +281,7 @@ function PlayerManager:update_cohesion_stacks(t, dt)
 		end
 
 		local is_downed = game_state_machine:verify_game_state(GameStateFilters.downed)
-		new_to_tend =  is_downed and 0 or per_member_tendency * affected_player_count
+		new_to_tend = is_downed and 0 or (per_member_tendency * affected_player_count + self:team_upgrade_value("player", "linchpin_increase_default_tendency", 0))
 	end
 
 	if self._cohesion_stack_t <= t then

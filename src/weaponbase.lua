@@ -18,7 +18,9 @@ Hooks:PostHook(weapon_base,"reload_speed_multiplier","linchpin_weaponbase_reload
 	if managers.player:has_team_category_upgrade("player", "linchpin_crew_reload_bonus") then
 		local cohesion_stacks = managers.player:get_cohesion_stacks_as_treated()
 		local potency_amount = managers.player:get_cohesion_step(cohesion_stacks)
-		multiplier = multiplier + managers.player:team_upgrade_value("player", "linchpin_crew_reload_bonus", 0) * potency_amount
+		local bonus = managers.player:team_upgrade_value("player", "linchpin_crew_reload_bonus", 0) + managers.player:team_upgrade_value("player", "linchpin_additional_move_reload_bonus", 0)
+
+		multiplier = multiplier + bonus * potency_amount
 	end
 
 	return multiplier

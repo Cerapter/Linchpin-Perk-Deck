@@ -33,6 +33,10 @@
 			"script_path" : "src/playerdamage.lua"
 		},
 		{
+			"hook_id" : "lib/units/beings/player/playermovement",
+			"script_path" : "src/playermovement.lua"
+		},
+		{
 			"hook_id" : "lib/network/handlers/unitnetworkhandler",
 			"script_path" : "src/unitnetworkhandler.lua"
 		},

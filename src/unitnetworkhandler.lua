@@ -23,7 +23,7 @@ function UnitNetworkHandler:sync_cohesion_stacks(data, affected, change_tendency
     local peer_unit = peer:unit()
     local is_affected = affected[peer_unit] ~= nil
 
-	managers.chat:send_message(1, '[Linchpin]','SYNCING', Color.yellow)
+	managers.chat:send_message(1, '[Linchpin]','SYNCING SYNC', Color.yellow)
 	managers.player:set_synced_cohesion_stacks(peer_id, checked_cohesion_data, is_affected and change_tendency)
 end
 
@@ -41,6 +41,7 @@ function UnitNetworkHandler:sync_add_cohesion_stacks(amount, go_over_tendency, a
 
     local peer_unit = peer:unit()
     if  affected[peer_unit] ~= nil then
+		managers.chat:send_message(1, '[Linchpin]','SYNCING ADD', Color.yellow)
 		managers.player:add_cohesion_stacks(amount, go_over_tendency)
 	end
 end

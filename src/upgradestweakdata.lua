@@ -12,7 +12,7 @@ Hooks:PostHook(UpgradesTweakData, "_init_pd2_values", "linchpin_init", function(
     self.linchpin_per_crew_member = 8 -- The amount of Cohesion stacks per crew, used for tendency determination and "for every X" number.
     self.linchpin_change_t = 1 -- In seconds, how frequently do Cohesion stacks change.
     self.linchpin_hard_limit = 4 -- The maximum amount of players we'll ever consider for Cohesion counting. In case of Big Lobby mods, we shouldn't escalate to ridiculous amounts.
-	-- Represents 
+	-- Represents how much a loss of a specific "resource" equals in damage taken. I.e., is taking health damage worse than taking armour damage for the purposes of Cohesion stack loss?
 	self.linchpin_damage_weighs_for_stack_loss = {
 		health = 2,
 		armour = 1

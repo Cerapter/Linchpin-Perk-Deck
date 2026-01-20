@@ -70,18 +70,24 @@ Hooks:PostHook(PlayerManager,"check_skills","linchpin_playermanager_check_skills
 	end
 end)
 
+--- Packs a table of peer IDs into a comma-separated string.
+--- @param peer_set table<integer, boolean> Set of peer IDs. Keys are IDs, values are true.
+--- @return string packed_ids Comma-separated list of peer IDs.
+function PlayerManager:pack_linchpin_affected_peer_set(peer_set)
+    local ids = {}
+
+    for peer_id, _ in pairs(peer_set) do
+        ids[#ids + 1] = tostring(peer_id)
+    end
+
+    return table.concat(ids, ",")
+end
+
 function PlayerManager:_linchpin_on_personal_kill(_, _, _)
 	local player_unit = self:player_unit()
 	if self._num_kills % self._linchpin_personal_target_kills == 0 and player_unit ~= nil then
-		local affected_players = {}
-		local heisters = World:find_units_quick("sphere", player_unit:position(),
-			tweak_data.upgrades.linchpin_proximity or 0, managers.slot:get_mask("all_criminals"))
-		
-		for i, unit in ipairs(heisters) do
-			affected_players[unit:id()] = true
-		end
-
-		managers.network:session():send_to_peers_synched("sync_add_cohesion_stacks", self._linchpin_personal_target_rewards, false, affected_players)
+		local affected_players = self:get_linchpin_aura_affected(player_unit:position())
+		managers.network:session():send_to_peers_synched("sync_add_cohesion_stacks", self._linchpin_personal_target_rewards, false,  self:pack_linchpin_affected_peer_set(affected_players))
 		managers.player:add_cohesion_stacks(self._linchpin_personal_target_rewards, false)
 	end
 end
@@ -89,15 +95,8 @@ end
 function PlayerManager:_linchpin_on_crew_kill(_, _, _)
 	local player_unit = self:player_unit()
 	if self._num_kills % self._linchpin_crew_target_kills == 0 and player_unit ~= nil then
-		local affected_players = {}
-		local heisters = World:find_units_quick("sphere", player_unit:position(),
-			tweak_data.upgrades.linchpin_proximity or 0, managers.slot:get_mask("all_criminals"))
-		
-		for i, unit in ipairs(heisters) do
-			affected_players[unit:id()] = true
-		end
-
-		managers.network:session():send_to_peers_synched("sync_add_cohesion_stacks", self._linchpin_crew_target_rewards, true, affected_players)
+		local affected_players = self:get_linchpin_aura_affected(player_unit:position())
+		managers.network:session():send_to_peers_synched("sync_add_cohesion_stacks", self._linchpin_crew_target_rewards, true, self:pack_linchpin_affected_peer_set(affected_players))
 		managers.player:add_cohesion_stacks(self._linchpin_crew_target_rewards, true)
 	end
 end
@@ -140,17 +139,6 @@ function PlayerManager:set_synced_cohesion_stacks(peer_id, data, affect_tendency
 		amount = data.amount,
 		to_tend = received_to_tend
 	}
-
-	-- TODO REMOVE DEBUG
-	local this_peer_id = managers.network:session():local_peer():id()
-	managers.chat:send_message(1, '[Linchpin]',
-		'Peer ' ..
-		tostring(this_peer_id) ..
-		' received Cohesion stack synching from ' ..
-		tostring(peer_id) ..
-		' - Stacks: ' ..
-		tostring(data.amount) .. ' - Tendency: ' .. tostring(data.to_tend) .. ' (' .. tostring(affect_tendency) ..
-		') - Saved: '..tostring(received_to_tend), Color.yellow)
 end
 
 ---Iterates through all the synced Linchpin data, and picks out the highest suggested Cohesion stack count to tend to.
@@ -193,16 +181,16 @@ end
 
 --- Updates the current player's Cohesion stacks for all players, and updates the Cohesion tendency suggested by the current player based on the affected parameter.
 --- @param data SyncedLinchpinAuraData See class for details.
---- @param affected boolean[] The table of unit IDs who are currently in the current player's Linchpin aura. Used for determining whose tendency numbers should be changed. Values don't matter, only indices. Can be empty.
+--- @param affected boolean[] The table of peer IDs who are currently in the current player's Linchpin aura. Used for determining whose tendency numbers should be changed. Values don't matter, only indices. Can be empty.
 --- @param change_tendency boolean If true, tendency should be changed as well. If false, do not adjust it.
 function PlayerManager:update_cohesion_stacks_for_peers(data, affected, change_tendency)
 	local peer = managers.network:session():local_peer()
 	local is_affected = false
-	if peer and peer:unit() and peer:unit():id() then 
-    	is_affected = affected[peer:unit():id()] ~= nil
+	if peer then 
+    	is_affected = affected[peer:id()] ~= nil
 	end
 
-	managers.network:session():send_to_peers_synched("sync_cohesion_stacks", data, affected, change_tendency)
+	managers.network:session():send_to_peers_synched("sync_cohesion_stacks", data.amount, data.to_tend, self:pack_linchpin_affected_peer_set(affected), change_tendency)
 	self:set_synced_cohesion_stacks(peer:id(), data, is_affected and change_tendency)
 end
 
@@ -230,6 +218,26 @@ function PlayerManager:add_cohesion_stacks(amount, go_over_tendency)
 			to_tend = nil
 		}, {}, false)
 	end
+end
+
+---comment
+---@param position any
+---@return table
+---@return number
+function PlayerManager:get_linchpin_aura_affected(position)
+	local affected_players = {}
+	local all_heister_count = 0
+	local heisters = World:find_units_quick("sphere", position,
+		tweak_data.upgrades.linchpin_proximity or 0, managers.slot:get_mask("all_criminals"))
+	for i, unit in ipairs(heisters) do
+		all_heister_count = all_heister_count +1
+		if managers.network:session():peer_by_unit(unit) then
+			local tagged_id = managers.network:session():peer_by_unit(unit):id()
+			affected_players[tagged_id] = true
+		end
+	end
+
+	return affected_players, all_heister_count
 end
 
 --- Handles manipulating the Cohesion stack count.
@@ -263,25 +271,16 @@ function PlayerManager:update_cohesion_stacks(t, dt)
 		self._cached_cohesion_amount = new_amount
 	end
 
-	--- The unit IDs of the affected players. Table index should be unit IDs, values don't matter.
-	--- @type boolean[]
 	local affected_players = {}
 
 	-- Linchpin users get to update their "suggested" tendency.
 	if self:upgrade_value("player", "linchpin_emit_aura", 0) ~= 0 then
-		local heisters = World:find_units_quick("sphere", player_unit:position(),
-			tweak_data.upgrades.linchpin_proximity or 0, managers.slot:get_mask("all_criminals"))
-		for i, unit in ipairs(heisters) do
-			affected_players[unit:id()] = true
-		end
+		local affected_count = 0
+		affected_players, affected_count = self:get_linchpin_aura_affected(player_unit:position())
 		local per_member_tendency = tweak_data.upgrades.linchpin_per_crew_member or 0
-		local affected_player_count = 0
-		for _ in pairs(affected_players) do
-			affected_player_count = math.min(affected_player_count + 1, tweak_data.upgrades.linchpin_hard_limit or 4)
-		end
 
 		local is_downed = game_state_machine:verify_game_state(GameStateFilters.downed)
-		new_to_tend = is_downed and 0 or (per_member_tendency * affected_player_count + self:team_upgrade_value("player", "linchpin_increase_default_tendency", 0))
+		new_to_tend = is_downed and 0 or (per_member_tendency * affected_count + self:team_upgrade_value("player", "linchpin_increase_default_tendency", 0))
 	end
 
 	if self._cohesion_stack_t <= t then

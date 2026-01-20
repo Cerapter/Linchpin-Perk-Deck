@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<mod name="Linchpin Perk Deck" global_key="linchpin_perk_deck">
+	<tweak definition="network_tweaks.xml"/>
+</mod>

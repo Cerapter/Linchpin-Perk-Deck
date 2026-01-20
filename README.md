@@ -31,6 +31,11 @@ I tried leaning on hooks as much as possible, so I expect that this perk deck sh
 
 ### Cohesion Stacks, and Gaining and Losing Them
 
+https://github.com/user-attachments/assets/7b99a88e-fcc9-4f3a-86fb-6748c0a8a23d
+
+*The Cohesion stack display in action on the right side of the screen.*  
+*As most of the perk deck's benefits depend on 8 stacks of Cohesion, the number in the top right shows how many 8 stacks you have.*
+
 The deck is primarily oriented around gaining Cohesion stacks and keeping them as high as possible. Cohesion stacks are also dvided into two important number: their actual **amount** and their **tendency**.
 
 The **amount** is the simpler of these two. The amount of Cohesion stacks is quite literally the amount you actually have. The **tendency** determines (in part) how it changes. Your Cohesion stack amount will *tend towards* the tendency. This means that if your amount is below your tendency, your amount will slowly increase, and if it's above it, it'll decrease.

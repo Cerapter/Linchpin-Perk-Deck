@@ -45,7 +45,10 @@ Hooks:PostHook(SkillTreeTweakData, "init", "linchpin_init_skill_tree", function(
     local perk_deck_data = {
         name_id = "menu_deck_linchpin_title",
         desc_id = "menu_deck_linchpin_desc",
-        category = "supportive",
+        category = {
+            "supportive",
+            "challenge"
+        },
         {
             upgrades = {
                 "player_linchpin_aura",

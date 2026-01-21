@@ -2,4 +2,7 @@
 	<Localization directory="localisation" default="english.json">
 		<loc file="english.json" language="english" />
 	</Localization>
+	<Hooks directory="src">
+	    <hook file="tweakdata.lua" source_file="lib/tweak_data/tweakdata"/>
+	</Hooks>
 </mod>

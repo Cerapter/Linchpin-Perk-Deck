@@ -42,13 +42,13 @@ Hooks:PostHook(UpgradesTweakData, "_init_pd2_values", "linchpin_init", function(
 
     -- Dodge metre increase per second from Eyes Open and Stand Firm, percentage value.
     self.values.team.player.linchpin_crew_dodge_metre_fill = {
-        0.025 * LINCHPIN_DEBUGNUMBERS
+        0.01 * LINCHPIN_DEBUGNUMBERS
     }
 	-- I feel like this can be merged with the first one, but I am not sure what an upgrade being incremental does.
 	-- I thought they'd just get added together, but then a buncha upgrades in Vanilla go 1 then 2 in values.
 	-- That'd mean they have 3 stages, but they often only have 2.
     self.values.team.player.linchpin_crew_dodge_metre_fill_2 = {
-        0.025 * LINCHPIN_DEBUGNUMBERS
+        0.01 * LINCHPIN_DEBUGNUMBERS
     }
     self.crew_dodge_metre_fill_t = 1 -- In seconds, how frequently should the dodge meter be given.
 
@@ -76,14 +76,14 @@ Hooks:PostHook(UpgradesTweakData, "_init_pd2_values", "linchpin_init", function(
 	-- HP regeneration based on stacks.
 	self.values.team.player.linchpin_regen_health = {
 		{
-			amount = 1 * LINCHPIN_DEBUGNUMBERS, -- This much health per X Cohesion stacks.
+			amount = 0.1 * LINCHPIN_DEBUGNUMBERS, -- This much health per X Cohesion stacks.
 			seconds = 5 -- This often.
 		}
 	}
 
 	-- How much faster should armour be regenerated based on stacks, in percentages.
 	self.values.team.player.linchpin_armour_regen_bonus = {
-		0.1 * LINCHPIN_DEBUGNUMBERS
+		0.025 * LINCHPIN_DEBUGNUMBERS
 	}
 
 	-- How much faster should stamina regenerate based on stacks.

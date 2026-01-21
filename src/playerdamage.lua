@@ -58,7 +58,7 @@ Hooks:PostHook(PlayerDamage, "update" , "linchpin_playerdamage_update" , functio
 	if self._eyes_open_t <= t then
 		self._eyes_open_t = t + (tweak_data.upgrades.crew_dodge_metre_fill_t or 1)
 		local linchpin_dodge_meter_bonus = managers.player:team_upgrade_value("player", "linchpin_crew_dodge_metre_fill", 0) + managers.player:team_upgrade_value("player", "linchpin_crew_dodge_metre_fill_2", 0)
-		self:fill_dodge_meter(self._dodge_points * dt * linchpin_dodge_meter_bonus * cohesion_steps)
+		self:fill_dodge_meter(self._dodge_points * dt * linchpin_dodge_meter_bonus)
 	end
 
 	-- Dig In Your Heels! healing.

@@ -8,7 +8,7 @@
     "menu_deck_linchpin_1_1": "Stick Together!",
     "menu_deck_linchpin_1_1_desc": "Healing that crew members receive is #{skill_color}#+7.5%## more potent for every 8 stacks of Cohesion they have.",
     "menu_deck_linchpin_1_2": "Eyes Open!",
-    "menu_deck_linchpin_1_2_desc": "Crew members' dodge metres fill up by #{skill_color}#+2.5%## of their dodge every second for every 8 stacks of Cohesion they have.",
+    "menu_deck_linchpin_1_2_desc": "Crew members' dodge metres fill up by #{skill_color}#+1%## of their dodge every second.",
 
     "menu_deck_linchpin_3": "In Sync",
     "menu_deck_linchpin_3_desc": "Crew members' dodge is increased by #{skill_color}#1.25## points for every 8 stacks of Cohesion they have.",
@@ -37,7 +37,7 @@
     "menu_deck_linchpin_9_1": "Dig In Your Heels!",
     "menu_deck_linchpin_9_1_desc": "Crew members now only lose stacks for every #{skill_color}#32## damage taken.\nAdditionally, crew members regain #{skill_color}#1## health every 5 seconds for every 8 stacks of Cohesion they have.",
     "menu_deck_linchpin_9_2": "Stand Firm!",
-    "menu_deck_linchpin_9_2_desc": "Crew members regenerate armour #{skill_color}#+10%## faster for every 8 stacks of Cohesion they have.\nIn addition, crew members' dodge metres fill up by #{skill_color}#+2.5%## of their dodge every second for every 8 stacks of Cohesion they have.",
+    "menu_deck_linchpin_9_2_desc": "Crew members regenerate armour #{skill_color}#+2.5%## faster for every 8 stacks of Cohesion they have.\nIn addition, crew members' dodge metres fill up by #{skill_color}#+1%## of their dodge every second.",
     "menu_deck_linchpin_9_3": "Keep Pressing On!",
     "menu_deck_linchpin_9_3_desc": "Crew members' stamina regenerates #{skill_color}#+7.5%## faster for every 8 stacks of Cohesion they have.\nAdditionally, the benefits from Keep Moving! (Card 5, Choice 1) and Shoot and Scoot! (Card 5, Choice 2) increase to #{skill_color}#+7.5%## per 8 stacks of Cohesion.",
     "menu_deck_linchpin_9_4": "Press The Advantage!",

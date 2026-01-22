@@ -118,7 +118,7 @@ if desc_key ~= nil then
     -- Stand Firm
     twu.multi_choice_specialization_descs[desc_key][9][2] = {
         perk_value_1 = tostring(twu.values.team.player.linchpin_armour_regen_bonus[1] * 100)..'%', -- Armour regen
-        perk_value_2 = tostring(twu.values.team.player.linchpin_additional_armour[1] * 10) -- Additional armour
+        perk_value_2 = tostring(twu.values.team.player.linchpin_additional_armour[1] * 100)..'%' -- Additional armour percent
     }
 
     -- Keep Pressing On

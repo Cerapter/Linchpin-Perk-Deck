@@ -1,3 +1,10 @@
+Version 1.2:
+- Actually send over to other peers when they should nullify their tendency numbers because they left a Linchpin's proximity. Oops!
+- Fixed a few issues where players joining midgame could have their Cohesion stacks updated even before they actually have Cohesion stacks.
+- Show the perk deck's name when using the Lobby Player Info mod.
+- Changed Stand Firm! to grant +2% per stack extra armour rather than a straight +4 armour. Still based on base armour count.
+- Converted enemies now count as half a player for determining Cohesion tendency.
+
 Version 1.1:
 - Removed Eyes Open!.
 - Eyes Open! replaced by Conserve Ammo!, which gives an ammo box pickup boost.

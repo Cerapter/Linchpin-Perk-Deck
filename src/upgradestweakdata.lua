@@ -94,9 +94,9 @@ Hooks:PostHook(UpgradesTweakData, "_init_pd2_values", "linchpin_init", function(
 		0.02 * LINCHPIN_DEBUGNUMBERS
 	}
 
-	-- Additional armour granted to players per Cohesion stack.
+	-- Additional armour granted to players per Cohesion stack. Percent, based on the base armour value.
 	self.values.team.player.linchpin_additional_armour = {
-		0.4 * LINCHPIN_DEBUGNUMBERS
+		0.02 * LINCHPIN_DEBUGNUMBERS
 	}
 
 	-- How much faster should stamina regenerate based on stacks.

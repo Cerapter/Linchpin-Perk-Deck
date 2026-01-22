@@ -91,6 +91,11 @@ Hooks:PostHook(PlayerDamage, "change_armor" , "linchpin_change_armor" , function
 
 	if cohesion_loss > 0 then
 		local cohesion = managers.player:get_synced_cohesion_stacks(managers.network:session():local_peer():id())
+
+		if not cohesion or not cohesion.amount then
+			return
+		end
+
 		managers.player:update_cohesion_stacks_for_peers({
 			amount = math.max(0,(cohesion.amount or cohesion_loss) - cohesion_loss), 
 			to_tend = nil
@@ -117,6 +122,10 @@ Hooks:PostHook(PlayerDamage, "change_health" , "linchpin_change_health" , functi
 
 	if cohesion_loss > 0 then
 		local cohesion = managers.player:get_synced_cohesion_stacks(managers.network:session():local_peer():id())
+		
+		if not cohesion or not cohesion.amount then
+			return
+		end
 
 		managers.player:update_cohesion_stacks_for_peers({
 			amount = math.max(0,(cohesion.amount or cohesion_loss) - cohesion_loss),

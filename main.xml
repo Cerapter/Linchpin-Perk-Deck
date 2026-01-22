@@ -5,6 +5,7 @@
 
 	<Hooks directory="src">
 		<hook file="tweakdata.lua" source_file="lib/tweak_data/tweakdata"/>
+		<hook file="localisation.lua" source_file="lib/managers/localizationmanager"/>
 	</Hooks>
 	
 	<AddFiles directory="assets">

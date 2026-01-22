@@ -45,12 +45,12 @@ end)
 
 Hooks:PostHook(PlayerManager, "body_armor_skill_addend", "linchpin_playermanager_body_armor_skill_addend", function(self,_)
 	local addend = Hooks:GetReturn()
+	local existing_armour = tweak_data.player.damage.ARMOR_INIT + self:body_armor_value("armor")
 
-    	if self:has_team_category_upgrade("player", "linchpin_additional_armour") then
+	if self:has_team_category_upgrade("player", "linchpin_additional_armour") then
 		local cohesion_steps = self:get_cohesion_stacks_as_treated()
-		local extra_armour = self:team_upgrade_value("player", "linchpin_additional_armour", 0) * cohesion_steps
-
-		addend = addend + extra_armour
+		local extra_armour_percent = self:team_upgrade_value("player", "linchpin_additional_armour", 0) * cohesion_steps
+		addend = addend + existing_armour * extra_armour_percent
 	end
 
 	return addend
@@ -168,13 +168,19 @@ end
 --- Updates a given peer's Linchpin-related data.
 --- @param peer_id integer The source peer's ID, whose data needs to be updated.
 --- @param data SyncedLinchpinAuraData Cohesion stack data for the selected peer.
---- @param affect_tendency boolean If true, also update the `to_tend` value.
-function PlayerManager:set_synced_cohesion_stacks(peer_id, data, affect_tendency)
+--- @param change_tendency boolean If true, the `to_tend` the select peer's tendency will be changed on this side. How is determined by `is_affected`.
+--- @param is_affected boolean Working in tandem with `change_tendency`, if true (and `change_tendency` is true), use the `to_tend` from the incoming data to set the matching peer's tendency. If false, but `change_tendency` is true, forcibly 0 the matching peer's tendency.
+function PlayerManager:set_synced_cohesion_stacks(peer_id, data, is_affected, change_tendency)
 	local received_to_tend = 0
-	if affect_tendency and data.to_tend ~= nil then
-		received_to_tend = data.to_tend
-	elseif self._global.synced_cohesion_stacks[peer_id] ~= nil and self._global.synced_cohesion_stacks[peer_id].to_tend ~= nil then
-		received_to_tend = self._global.synced_cohesion_stacks[peer_id].to_tend
+
+	if change_tendency then
+		if is_affected and data.to_tend ~= nil then
+			received_to_tend = data.to_tend
+		end
+	else
+		if self._global.synced_cohesion_stacks[peer_id] ~= nil and self._global.synced_cohesion_stacks[peer_id].to_tend ~= nil then
+			received_to_tend = self._global.synced_cohesion_stacks[peer_id].to_tend
+		end
 	end
 
 	self._global.synced_cohesion_stacks[peer_id] = {
@@ -236,7 +242,7 @@ function PlayerManager:update_cohesion_stacks_for_peers(data, affected, change_t
 	end
 
 	managers.network:session():send_to_peers_synched("sync_cohesion_stacks", data.amount, data.to_tend, self:pack_linchpin_affected_peer_set(affected), change_tendency)
-	self:set_synced_cohesion_stacks(peer:id(), data, is_affected and change_tendency)
+	self:set_synced_cohesion_stacks(peer:id(), data, is_affected, change_tendency)
 end
 
 --- A simplified function that simply just adds an amount to the Cohesion stacks. It then synchronises the changes to the other clients.
@@ -249,7 +255,7 @@ function PlayerManager:add_cohesion_stacks(amount, go_over_tendency)
 		return
 	end
 
-	local data = self:get_synced_cohesion_stacks(local_peer_id)
+	local data = self:get_synced_cohesion_stacks(local_peer_id) or {amount = 0, to_tend = 0}
 	local new_amount = data.amount + amount
 
 	if not go_over_tendency then
@@ -275,7 +281,11 @@ function PlayerManager:get_linchpin_aura_affected(position)
 	local heisters = World:find_units_quick("sphere", position,
 		tweak_data.upgrades.linchpin_proximity or 0, managers.slot:get_mask("all_criminals"))
 	for i, unit in ipairs(heisters) do
-		all_heister_count = all_heister_count +1
+		if unit:slot() == 16 then
+			all_heister_count = all_heister_count + 0.5
+		else
+			all_heister_count = all_heister_count + 1
+		end
 		if managers.network:session():peer_by_unit(unit) then
 			local tagged_id = managers.network:session():peer_by_unit(unit):id()
 			affected_players[tagged_id] = true

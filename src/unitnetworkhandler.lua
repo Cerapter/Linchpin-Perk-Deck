@@ -24,7 +24,7 @@ function UnitNetworkHandler:sync_cohesion_stacks(amount, to_tend, affected_packe
 	local affected_peers = self:unpack_linchpin_affected_peer_set(affected_packed)
     local is_affected = affected_peers[peer_id] ~= nil
 
-	managers.player:set_synced_cohesion_stacks(peer_id, checked_cohesion_data, is_affected and change_tendency)
+	managers.player:set_synced_cohesion_stacks(peer_id, checked_cohesion_data, is_affected, change_tendency)
 end
 
 --- Tells peers to give themselves Cohesion stacks.

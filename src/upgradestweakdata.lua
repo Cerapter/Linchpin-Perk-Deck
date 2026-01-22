@@ -37,22 +37,30 @@ Hooks:PostHook(UpgradesTweakData, "_init_pd2_values", "linchpin_init", function(
 
     -- Healing potency increase from Stick Together, per crew member.
     self.values.team.player.linchpin_crew_heal_potency = {
-        0.075 * LINCHPIN_DEBUGNUMBERS
+        0.04 * LINCHPIN_DEBUGNUMBERS
     }
 
     -- Dodge metre increase per second from Eyes Open and Stand Firm, percentage value.
+	-- **UNUSED!**
     self.values.team.player.linchpin_crew_dodge_metre_fill = {
         0.01 * LINCHPIN_DEBUGNUMBERS
     }
 	-- I feel like this can be merged with the first one, but I am not sure what an upgrade being incremental does.
 	-- I thought they'd just get added together, but then a buncha upgrades in Vanilla go 1 then 2 in values.
 	-- That'd mean they have 3 stages, but they often only have 2.
+	-- **UNUSED!**
     self.values.team.player.linchpin_crew_dodge_metre_fill_2 = {
         0.01 * LINCHPIN_DEBUGNUMBERS
     }
-    self.crew_dodge_metre_fill_t = 1 -- In seconds, how frequently should the dodge meter be given.
+    self.crew_dodge_metre_fill_t = 1 -- In seconds, how frequently should the dodge meter be given. **UNUSED!**
+
+	-- Ammo pickup multiplier.
+	self.values.team.player.linchpin_ammo_pickup_boost = {
+		0.02 * LINCHPIN_DEBUGNUMBERS
+	}
 
     -- Percentage value, the dodge points increases for the team per Cohesion.
+	-- **UNUSED!**
     self.values.team.player.linchpin_crew_dodge_points = {
         0.0125 * LINCHPIN_DEBUGNUMBERS,
         0.025 * LINCHPIN_DEBUGNUMBERS
@@ -60,12 +68,12 @@ Hooks:PostHook(UpgradesTweakData, "_init_pd2_values", "linchpin_init", function(
 
     -- Percentage value, the movespeed increases for the team per Cohesion.
     self.values.team.player.linchpin_crew_movespeed_bonus = {
-        0.05 * LINCHPIN_DEBUGNUMBERS
+        0.02 * LINCHPIN_DEBUGNUMBERS
     }
 
     -- Percentage value, the movespeed increases for the team per Cohesion.
     self.values.team.player.linchpin_crew_reload_bonus = {
-        0.05 * LINCHPIN_DEBUGNUMBERS
+        0.02 * LINCHPIN_DEBUGNUMBERS
     }
 
 	-- Increase any tendency the player has by this amount of stacks.
@@ -76,24 +84,29 @@ Hooks:PostHook(UpgradesTweakData, "_init_pd2_values", "linchpin_init", function(
 	-- HP regeneration based on stacks.
 	self.values.team.player.linchpin_regen_health = {
 		{
-			amount = 0.1 * LINCHPIN_DEBUGNUMBERS, -- This much health per X Cohesion stacks.
+			amount = 0.025 * LINCHPIN_DEBUGNUMBERS, -- This much health per X Cohesion stacks.
 			seconds = 5 -- This often.
 		}
 	}
 
 	-- How much faster should armour be regenerated based on stacks, in percentages.
 	self.values.team.player.linchpin_armour_regen_bonus = {
-		0.025 * LINCHPIN_DEBUGNUMBERS
+		0.02 * LINCHPIN_DEBUGNUMBERS
+	}
+
+	-- Additional armour granted to players per Cohesion stack.
+	self.values.team.player.linchpin_additional_armour = {
+		0.4 * LINCHPIN_DEBUGNUMBERS
 	}
 
 	-- How much faster should stamina regenerate based on stacks.
 	self.values.team.player.linchpin_stamina_regen_bonus = {
-        0.075 * LINCHPIN_DEBUGNUMBERS
+        0.02 * LINCHPIN_DEBUGNUMBERS
 	}
 
 	-- Additional bonus for the move / reload speed bonus. As they're mutually-exclusive choices, sadly I cannot make use of upgrading them.
 	self.values.team.player.linchpin_additional_move_reload_bonus = {
-        0.025 * LINCHPIN_DEBUGNUMBERS
+        0.01 * LINCHPIN_DEBUGNUMBERS
 	}
 
     -- How many Cohesion stacks should everyone nearby gain when a crew member kills an amount of enemies.
@@ -110,15 +123,21 @@ Hooks:PostHook(UpgradesTweakData, "_init_pd2_values", "linchpin_init", function(
         8
     }
 
-    -- Percentage value, how much the gain ratio should be changed.
-    self.values.player.linchpin_gain_change = {
-        2
-    }
-
-    -- Percentage value, how much the loss ratio should be changed.
-    self.values.player.linchpin_loss_change = {
-        0.5
-    }
+	-- Concrete values on how the Linchpin user's stacks could change.
+	self.values.player.linchpin_stack_change_adjustments = {
+		{
+			gain = 1,
+			loss = 1
+		},
+		{
+			gain = -0.5,
+			loss = -1
+		},
+		{
+			gain = 0,
+			loss = 0
+		}
+	}
 
     -- How many Cohesion stacks should be gained on revive with Back To It!.
     self.values.player.linchpin_stacks_on_revive = {
@@ -148,7 +167,7 @@ Hooks:PostHook(UpgradesTweakData, "_player_definitions", "linchpin_player_defini
 
     -- Treats the user as having more Cohesion for effects.
     self.definitions.player_linchpin_treat_as_more_cohesion = {
-		name_id = "menu_deck_linchpin_3_1",
+		name_id = "menu_deck_linchpin_3",
 		category = "feature",
 		upgrade = {
 			value = 1,
@@ -157,22 +176,31 @@ Hooks:PostHook(UpgradesTweakData, "_player_definitions", "linchpin_player_defini
 		}
 	}
 
-    -- Doubles gain, halves loss
-    self.definitions.player_linchpin_gain_speed_up = {
-		name_id = "menu_deck_linchpin_3_2",
+	-- Change Cohesion gain and loss.
+    self.definitions.player_linchpin_stack_change_adjustments_1 = {
+		name_id = "menu_deck_linchpin_3_1",
 		category = "feature",
 		upgrade = {
 			value = 1,
-			upgrade = "linchpin_gain_change",
+			upgrade = "linchpin_stack_change_adjustments",
 			category = "player"
 		}
 	}
-    self.definitions.player_linchpin_loss_speed_down = {
-		name_id = "menu_deck_linchpin_3_2",
+    self.definitions.player_linchpin_stack_change_adjustments_2 = {
+		name_id = "menu_deck_linchpin_3_1",
 		category = "feature",
 		upgrade = {
-			value = 1,
-			upgrade = "linchpin_loss_change",
+			value = 2,
+			upgrade = "linchpin_stack_change_adjustments",
+			category = "player"
+		}
+	}
+    self.definitions.player_linchpin_stack_change_adjustments_3 = {
+		name_id = "menu_deck_linchpin_3_1",
+		category = "feature",
+		upgrade = {
+			value = 3,
+			upgrade = "linchpin_stack_change_adjustments",
 			category = "player"
 		}
 	}
@@ -233,6 +261,7 @@ Hooks:PostHook(UpgradesTweakData, "_team_definitions", "linchpin_team_definition
 	}
 
     -- Crew dodge metre autofill from Cohesion stacks.
+	-- **UNUSED!**
     self.definitions.team_linchpin_crew_dodge_metre_fill = {
 		name_id = "menu_deck_linchpin_1_2",
 		category = "team",
@@ -252,7 +281,19 @@ Hooks:PostHook(UpgradesTweakData, "_team_definitions", "linchpin_team_definition
 		}
 	}
 
+	-- Ammo pickup multiplier for the crew based on Cohesion stacks.
+	self.definitions.team_linchpin_ammo_pickup_multiplier = {
+		name_id = "menu_deck_linchpin_1_2",
+		category = "team",
+		upgrade = {
+			value = 1,
+			upgrade = "linchpin_ammo_pickup_boost",
+			category = "player"
+		}
+	}
+
     -- Crew dodge point gain.
+	-- **UNUSED!**
     self.definitions.team_linchpin_crew_dodge_points_1 = {
 		name_id = "menu_deck_linchpin_3",
 		category = "team",
@@ -305,7 +346,7 @@ Hooks:PostHook(UpgradesTweakData, "_team_definitions", "linchpin_team_definition
 		}
 	}
 
-    -- Crew ealth regen from Cohesion stacks.
+    -- Crew health regen from Cohesion stacks.
     self.definitions.team_linchpin_regen_health = {
 		name_id = "menu_deck_linchpin_9_1",
 		category = "team",
@@ -323,6 +364,17 @@ Hooks:PostHook(UpgradesTweakData, "_team_definitions", "linchpin_team_definition
 		upgrade = {
 			value = 1,
 			upgrade = "linchpin_armour_regen_bonus",
+			category = "player"
+		}
+	}
+
+	-- Additional crew armour from Cohesion stacks.
+    self.definitions.team_linchpin_additional_armour = {
+		name_id = "menu_deck_linchpin_9_2",
+		category = "team",
+		upgrade = {
+			value = 1,
+			upgrade = "linchpin_additional_armour",
 			category = "player"
 		}
 	}

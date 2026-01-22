@@ -43,17 +43,17 @@ if desc_key ~= nil then
 
     -- In Sync
     twu.specialization_descs[desc_key][3] = {
-        perk_value_1 = tostring(twu.values.team.player.linchpin_crew_dodge_points[1] * 100) -- Dodge points for the whole crew
+        perk_value_1 = tostring(twu.values.player.linchpin_treat_as_more_cohesion[1]) -- Treat as having this many extra Cohesion stacks
     }
 
-    -- Quick Steps
+    -- Speed Is Key
     twu.specialization_descs[desc_key][5] = {
-        perk_value_1 = tostring((twu.values.player.passive_dodge_chance[2] - twu.values.player.passive_dodge_chance[1]) * 100) -- Passive dodge increase
+		perk_value_1 = tostring(twu.values.player.corpse_dispose_speed_multiplier[1] * 100).."%" -- Faster interaction with civs + bagging corpses
     }
 
     -- Every Angle Covered
     twu.specialization_descs[desc_key][7] = {
-        perk_value_1 = tostring((twu.values.team.player.linchpin_crew_dodge_points[2] - twu.values.team.player.linchpin_crew_dodge_points[1]) * 100) -- Dodge points for the whole crew
+        perk_value_1 = tostring((twu.values.player.passive_dodge_chance[2] - twu.values.player.passive_dodge_chance[1]) * 100) -- Passive dodge increase
     }
 
     -- Ironclad Formation
@@ -67,21 +67,25 @@ if desc_key ~= nil then
         perk_value_1 = tostring(twu.values.team.player.linchpin_crew_heal_potency[1] * 100)..'%' -- Increased healing potency
     }
 
-    -- Eyes Open
+    -- Conserve Ammo
     twu.multi_choice_specialization_descs[desc_key][1][2] = {
-        perk_value_1 = tostring(twu.values.team.player.linchpin_crew_dodge_metre_fill[1] * 100)..'%' -- Dodge metre fill up percent
+        perk_value_1 = tostring(twu.values.team.player.linchpin_ammo_pickup_boost[1] * 100)..'%' -- Ammo pickup boost
     }
 
     -- Lead By Example
     twu.multi_choice_specialization_descs[desc_key][3][1] = {
-        perk_value_1 = tostring(twu.values.player.linchpin_treat_as_more_cohesion[1]) -- Treat as having this many extra Cohesion stacks
+        perk_value_1 = tostring(math.abs((twu.linchpin_gain + twu.values.player.linchpin_stack_change_adjustments[1].gain) / twu.linchpin_gain - 1) * 100)..'%', -- Cohesion stack change from proximity
+        perk_value_2 = tostring(math.abs((twu.linchpin_loss + twu.values.player.linchpin_stack_change_adjustments[1].loss) / twu.linchpin_loss - 1) * 100)..'%' -- Cohesion stack change from lack proximity
     }
 
     -- Hold The Line
     twu.multi_choice_specialization_descs[desc_key][3][2] = {
-        perk_value_1 = tostring((twu.values.player.linchpin_gain_change[1] - 1) * 100)..'%', -- Cohesion stack gain increase from proximity
-        perk_value_2 = tostring(math.abs(twu.values.player.linchpin_loss_change[1] - 1) * 100)..'%' -- Cohesion stack loss decrease from lack of proximity
+        perk_value_1 = tostring(math.abs((twu.linchpin_gain + twu.values.player.linchpin_stack_change_adjustments[2].gain) / twu.linchpin_gain - 1) * 100)..'%', -- Cohesion stack change from proximity
+        perk_value_2 = tostring(math.abs((twu.linchpin_loss + twu.values.player.linchpin_stack_change_adjustments[2].loss) / twu.linchpin_loss - 1) * 100)..'%' -- Cohesion stack change from lack proximity
     }
+
+    -- Standard Tactics!
+    -- Doesn't need adding stuff.
 
     -- Keep Moving
     twu.multi_choice_specialization_descs[desc_key][5][1] = {
@@ -114,13 +118,13 @@ if desc_key ~= nil then
     -- Stand Firm
     twu.multi_choice_specialization_descs[desc_key][9][2] = {
         perk_value_1 = tostring(twu.values.team.player.linchpin_armour_regen_bonus[1] * 100)..'%', -- Armour regen
-        perk_value_2 = tostring(twu.values.team.player.linchpin_crew_dodge_metre_fill_2[1] * 100)..'%' -- Dodge metre fill
+        perk_value_2 = tostring(twu.values.team.player.linchpin_additional_armour[1] * 10) -- Additional armour
     }
 
     -- Keep Pressing On
     twu.multi_choice_specialization_descs[desc_key][9][3] = {
         perk_value_1 = tostring(twu.values.team.player.linchpin_stamina_regen_bonus[1] * 100)..'%', -- Stamina regen
-        perk_value_2 = tostring((twu.values.team.player.linchpin_additional_move_reload_bonus[1] + twu.values.team.player.linchpin_crew_movespeed_bonus[1]) * 100)..'%' -- Movement / reload speed increase (this assumes they are the same, and this is specifically for movement)
+        perk_value_2 = tostring(math.abs((twu.values.team.player.linchpin_additional_move_reload_bonus[1] + twu.values.team.player.linchpin_crew_movespeed_bonus[1])/ twu.values.team.player.linchpin_crew_movespeed_bonus[1] - 1) * 100)..'%' -- Movement / reload speed increase (this assumes they are the same, and this is specifically for movement)
     }
 
     -- Press The Advantage

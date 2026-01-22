@@ -1,0 +1,17 @@
+Version 1.1:
+- Removed Eyes Open!.
+- Eyes Open! replaced by Conserve Ammo!, which gives an ammo box pickup boost.
+- Fixed an oversight where I added a max amount of stacks then never used them, allowing potentially 13 * 8 stacks from a full team with 2 jokers each. You now correctly only get 4 * 8 stacks, with an additional 8 from the last card, and a "theoretical" additional 8 from In Sync (see below).
+- In Sync changed to give the "treat as if you had 8 more Cohesion" effect instead of the crew dodge metre fill effect it had.
+- Lead By Example! changed to speed up both gain and loss rate.
+- Hold The Line! changed to slow down both gain and loss rate.
+- A third choice was added for In Sync that does not adjust gain and loss rates.
+- Quick Steps renamed to Speed Is Key, and effect changed to bagging corpses and interacting with hostages faster.
+- Keep Moving! and Shoot and Scoot! both had their bonus changed from +5% per 8 stack to +2% per 8 stack.
+- Every Angle Covered got Quick Steps's old dodge boost.
+- Dig In Your Heels! grants an additional 0.25 HP per 8 stacks now instead of 1 HP.
+- Stand Firm! now grants 2% armour regen per 8 stack, and its dodge metre fill is replaced by granting 4 armour per 8 stack.
+- Keep Pressing On! now grants 2% faster stamina regen per 8 stack. Its other benefit was simply rephrased, but otherwise has the same effect.
+
+Version 1.0:
+- First public release!

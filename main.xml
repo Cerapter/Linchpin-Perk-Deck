@@ -2,7 +2,12 @@
 	<Localization directory="localisation" default="english.json">
 		<loc file="english.json" language="english" />
 	</Localization>
+
 	<Hooks directory="src">
-	    <hook file="tweakdata.lua" source_file="lib/tweak_data/tweakdata"/>
+		<hook file="tweakdata.lua" source_file="lib/tweak_data/tweakdata"/>
 	</Hooks>
+	
+	<AddFiles directory="assets">
+		<texture path="guis/dlcs/linchpin/textures/pd2/specialization/icons_atlas"/>
+	</AddFiles>
 </mod>

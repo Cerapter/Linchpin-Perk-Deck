@@ -78,13 +78,13 @@ Hooks:PostHook(SkillTreeTweakData, "init", "linchpin_init_skill_tree", function(
                     name_id = "menu_deck_linchpin_1_2",
                     desc_id = "menu_deck_linchpin_1_2_desc",
                     short_id = "menu_deck_linchpin_1_2_desc",
-                    icon_atlas = "icons_atlas",
+                    texture_bundle_folder = "linchpin",
                     upgrades = {
-                        "team_linchpin_crew_dodge_metre_fill"
+                        "team_linchpin_ammo_pickup_multiplier"
                     },
                     icon_xy = {
                         0,
-                        2
+                        0
                     }
                 }
             }
@@ -92,7 +92,7 @@ Hooks:PostHook(SkillTreeTweakData, "init", "linchpin_init_skill_tree", function(
         shared_cards[1],
         {
             upgrades = {
-                "team_linchpin_crew_dodge_points_1"
+                "player_linchpin_treat_as_more_cohesion"
             },
             cost = cost(3),
             icon_xy = { 3, 4 },
@@ -105,7 +105,7 @@ Hooks:PostHook(SkillTreeTweakData, "init", "linchpin_init_skill_tree", function(
                     short_id = "menu_deck_linchpin_3_1_desc",
                     icon_atlas = "icons_atlas",
                     upgrades = {
-                        "player_linchpin_treat_as_more_cohesion"
+                        "player_linchpin_stack_change_adjustments_1"
                     },
                     icon_xy = {
                         2,
@@ -118,12 +118,24 @@ Hooks:PostHook(SkillTreeTweakData, "init", "linchpin_init_skill_tree", function(
                     short_id = "menu_deck_linchpin_3_2_desc",
                     icon_atlas = "icons_atlas",
                     upgrades = {
-                        "player_linchpin_gain_speed_up",
-                        "player_linchpin_loss_speed_down"
+                        "player_linchpin_stack_change_adjustments_2"
                     },
                     icon_xy = {
                         4,
                         2
+                    }
+                },
+                {
+                    name_id = "menu_deck_linchpin_3_3",
+                    desc_id = "menu_deck_linchpin_3_3_desc",
+                    short_id = "menu_deck_linchpin_3_3_desc",
+                    icon_atlas = "icons_atlas",
+                    upgrades = {
+                        "player_linchpin_stack_change_adjustments_3"
+                    },
+                    icon_xy = {
+                        7,
+                        3
                     }
                 }
             }
@@ -131,7 +143,8 @@ Hooks:PostHook(SkillTreeTweakData, "init", "linchpin_init_skill_tree", function(
         shared_cards[2],
         {
             upgrades = {
-                "player_passive_dodge_chance_2"
+                "player_corpse_dispose_speed_multiplier",
+                "player_civ_move_multiplier"
             },
             cost = cost(5),
             icon_xy = { 3, 0 },
@@ -169,7 +182,7 @@ Hooks:PostHook(SkillTreeTweakData, "init", "linchpin_init_skill_tree", function(
         shared_cards[3],
         {
             upgrades = {
-                "team_linchpin_crew_dodge_points_2"
+                "player_passive_dodge_chance_2"
             },
             cost = cost(7),
             icon_xy = { 4, 4 },
@@ -232,11 +245,11 @@ Hooks:PostHook(SkillTreeTweakData, "init", "linchpin_init_skill_tree", function(
                 {
                     name_id = "menu_deck_linchpin_9_2",
                     desc_id = "menu_deck_linchpin_9_2_desc",
-                    short_id = "menu_deck_linchpin_9_2_desc",
+                    short_id = "menu_deck_linchpin_9_2_short",
                     icon_atlas = "icons_atlas",
                     upgrades = {
-                        "team_linchpin_crew_dodge_metre_fill_2",
-                        "team_linchpin_armour_regen_bonus"
+                        "team_linchpin_armour_regen_bonus",
+                        "team_linchpin_additional_armour"
                     },
                     icon_xy = {
                         0,

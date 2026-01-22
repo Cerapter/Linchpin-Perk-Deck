@@ -24,7 +24,7 @@ end)
 --- The "other half" of this implementation is in the PlayerDamage:update() hook in playerdamage.lua.
 Hooks:PostHook(PlayerManager, "skill_dodge_chance", "linchpin_playermanager_skill_dodge_chance", function(self, _, _, _, _, _)
 	local chance = Hooks:GetReturn()
-	local cohesion_stacks = self:get_cohesion_step(self:get_cohesion_stacks_as_treated()) or 0
+	local cohesion_stacks = self:get_cohesion_stacks_as_treated() or 0
 	chance = chance + self:team_upgrade_value("player", "linchpin_crew_dodge_points", 0) * cohesion_stacks
 	return chance
 end)
@@ -34,8 +34,7 @@ Hooks:PostHook(PlayerManager, "movement_speed_multiplier", "linchpin_playermanag
 	local multiplier = Hooks:GetReturn()
 
     if self:has_team_category_upgrade("player", "linchpin_crew_movespeed_bonus") then
-		local cohesion_stacks = self:get_cohesion_stacks_as_treated()
-		local potency_amount = self:get_cohesion_step(cohesion_stacks)
+		local potency_amount = self:get_cohesion_stacks_as_treated()
 		local bonus = self:team_upgrade_value("player", "linchpin_crew_movespeed_bonus", 0) + self:team_upgrade_value("player", "linchpin_additional_move_reload_bonus", 0)
 
 		multiplier = multiplier + bonus * potency_amount
@@ -44,7 +43,27 @@ Hooks:PostHook(PlayerManager, "movement_speed_multiplier", "linchpin_playermanag
 	return multiplier
 end)
 
+Hooks:PostHook(PlayerManager, "body_armor_skill_addend", "linchpin_playermanager_body_armor_skill_addend", function(self,_)
+	local addend = Hooks:GetReturn()
+
+    	if self:has_team_category_upgrade("player", "linchpin_additional_armour") then
+		local cohesion_steps = self:get_cohesion_stacks_as_treated()
+		local extra_armour = self:team_upgrade_value("player", "linchpin_additional_armour", 0) * cohesion_steps
+
+		addend = addend + extra_armour
+	end
+
+	return addend
+end)
+
 Hooks:PostHook(PlayerManager,"check_skills","linchpin_playermanager_check_skills",function(self)
+	-- Conserve Ammo!
+	if self:has_team_category_upgrade("player", "linchpin_ammo_pickup_boost") then
+		self._message_system:register(Message.OnAmmoPickup, "linchpin_crew_ammo_pickup_boost", callback(self, self, "_linchpin_on_ammo_pickup_boost"))
+	else
+		self._message_system:unregister(Message.OnAmmoPickup, "linchpin_crew_ammo_pickup_boost")
+	end
+
 	-- Earn Your Keep!
 	if self:has_category_upgrade("player", "linchpin_personal_kill_stack_reward") then
 		self._linchpin_personal_target_kills = self:upgrade_value("player", "linchpin_personal_kill_stack_reward").enemies
@@ -83,6 +102,28 @@ function PlayerManager:pack_linchpin_affected_peer_set(peer_set)
     return table.concat(ids, ",")
 end
 
+function PlayerManager:_linchpin_on_ammo_pickup_boost(unit)
+	local cohesion_stacks = self:get_cohesion_stacks_as_treated() or 0
+	local extra_pickup = self:team_upgrade_value("player", "linchpin_ammo_pickup_boost", 0) * cohesion_stacks
+	local inventory = unit:inventory()
+	
+	if inventory then
+		local available_selections = {}
+
+		for i, weapon in pairs(inventory:available_selections()) do
+			if inventory:is_equipped(i) then
+				table.insert(available_selections, 1, weapon)
+			else
+				table.insert(available_selections, weapon)
+			end
+		end
+
+		for _, weapon in ipairs(available_selections) do
+			weapon.unit:base():add_ammo(extra_pickup)
+		end
+	end
+end
+
 function PlayerManager:_linchpin_on_personal_kill(_, _, _)
 	local player_unit = self:player_unit()
 	if self._num_kills % self._linchpin_personal_target_kills == 0 and player_unit ~= nil then
@@ -109,8 +150,8 @@ function PlayerManager:get_synced_cohesion_stacks(peer_id)
 	return self._global.synced_cohesion_stacks[peer_id]
 end
 
---- For the purposes of effects, returns the amount of Cohesion stacks the local peer is treated as having (which may be different than how many it has).
----@return integer cohesion_stacks The actual Cohesion stacks, plus any "as treated" extras.
+--- For the purposes of effects, returns the amount of Cohesion stacks the local peer is treated as having (which may be different than how many it has), divided by the amount necessary for a "step" (typically 8).
+---@return integer cohesion_stacks The actual Cohesion stacks, plus any "as treated" extras, divided by 8.
 function PlayerManager:get_cohesion_stacks_as_treated()
 	local local_peer = managers.network:session() and managers.network:session():local_peer()
 	if not local_peer then
@@ -119,8 +160,9 @@ function PlayerManager:get_cohesion_stacks_as_treated()
 
 	local extra_amount = self:upgrade_value("player", "linchpin_treat_as_more_cohesion", 0)
 	local cohesion_stacks = managers.player:get_synced_cohesion_stacks(local_peer:id())
+	local all = (cohesion_stacks and cohesion_stacks.amount or 0) + extra_amount
 
-	return (cohesion_stacks and cohesion_stacks.amount or 0) + extra_amount
+	return self:get_cohesion_step(all)
 end
 
 --- Updates a given peer's Linchpin-related data.
@@ -170,10 +212,13 @@ function PlayerManager:get_cohesion_stack_change_amount(current_amount, goal)
 	local per_eight_current =  self:get_cohesion_step(current_amount) -- Similar to per_eight_goal.
 	local step_difference = math.abs(per_eight_goal - per_eight_current)
 
+	
 	if current_amount < goal then
-		change = math.min(goal - current_amount, (tweak_data.upgrades.linchpin_gain or 1) * self:upgrade_value("player", "linchpin_gain_change", 1) * math.max(step_difference,1))
+		local additional_gain = self:has_category_upgrade("player","linchpin_stack_change_adjustments") and self:upgrade_value("player", "linchpin_stack_change_adjustments").gain or 0
+		change = math.min(goal - current_amount, ((tweak_data.upgrades.linchpin_gain or 1) + additional_gain) * math.max(step_difference,1))
 	elseif current_amount > goal then
-		change = -math.min(current_amount - goal, (tweak_data.upgrades.linchpin_loss or 2) * self:upgrade_value("player", "linchpin_loss_change", 1) * math.max(step_difference,1))
+		local additional_loss = self:has_category_upgrade("player","linchpin_stack_change_adjustments") and self:upgrade_value("player", "linchpin_stack_change_adjustments").loss or 0
+		change = -math.min(current_amount - goal, ((tweak_data.upgrades.linchpin_loss or 2) + additional_loss) * math.max(step_difference,1))
 	end
 
 	return change
@@ -277,15 +322,20 @@ function PlayerManager:update_cohesion_stacks(t, dt)
 	if self:upgrade_value("player", "linchpin_emit_aura", 0) ~= 0 then
 		local affected_count = 0
 		affected_players, affected_count = self:get_linchpin_aura_affected(player_unit:position())
-		local per_member_tendency = tweak_data.upgrades.linchpin_per_crew_member or 0
-
+		local tendency_from_proximity = math.min(affected_count, tweak_data.upgrades.linchpin_hard_limit) * (tweak_data.upgrades.linchpin_per_crew_member or 0)
 		local is_downed = game_state_machine:verify_game_state(GameStateFilters.downed)
-		new_to_tend = is_downed and 0 or (per_member_tendency * affected_count + self:team_upgrade_value("player", "linchpin_increase_default_tendency", 0))
+		new_to_tend = is_downed and 0 or (tendency_from_proximity + self:team_upgrade_value("player", "linchpin_increase_default_tendency", 0))
 	end
 
 	if self._cohesion_stack_t <= t then
 		self._cohesion_stack_t = t + (tweak_data.upgrades.linchpin_change_t or 1)
-		new_amount = new_amount + self:get_cohesion_stack_change_amount(amount, self:get_highest_cohesion_tendency_target())
+
+		-- I didn't originally plan for fractional Cohesion stack changes, guh!
+		self._fractional_change_amount = (self._fractional_change_amount or 0.0) + self:get_cohesion_stack_change_amount(amount, self:get_highest_cohesion_tendency_target())
+		local integer_change_amount = math.round(self._fractional_change_amount)
+		self._fractional_change_amount = self._fractional_change_amount - integer_change_amount
+
+		new_amount = new_amount + integer_change_amount
 	end
 
 	new_to_tend = math.clamp(math.floor(new_to_tend), 0, 256)

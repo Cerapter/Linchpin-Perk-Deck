@@ -18,8 +18,7 @@ Hooks:OverrideFunction(PlayerDamage,"restore_health", function(self, health_rest
 
     local linchpin_healing_potency = 1
     if managers.player:has_team_category_upgrade("player", "linchpin_crew_heal_potency") then
-		local cohesion_stacks = managers.player:get_cohesion_stacks_as_treated()
-		local potency_amount = managers.player:get_cohesion_step(cohesion_stacks)
+		local potency_amount = managers.player:get_cohesion_stacks_as_treated()
 
 		linchpin_healing_potency = 1 + managers.player:team_upgrade_value("player", "linchpin_crew_heal_potency", 0) * potency_amount
 	end
@@ -34,8 +33,7 @@ Hooks:OverrideFunction(PlayerDamage,"restore_health", function(self, health_rest
 end)
 
 Hooks:PostHook(PlayerDamage, "update" , "linchpin_playerdamage_update" , function(self, _, t, dt)
-	local cohesion_stacks = managers.player:get_cohesion_stacks_as_treated()
-	local cohesion_steps = managers.player:get_cohesion_step(cohesion_stacks) -- Most things use the steps (i.e., they say "for every X stacks") so yeah, might as well determine this ahead of time.
+	local cohesion_steps = managers.player:get_cohesion_stacks_as_treated()
 
 	-- Anything that adds dodge points based on Cohesion.
 
@@ -53,13 +51,13 @@ Hooks:PostHook(PlayerDamage, "update" , "linchpin_playerdamage_update" , functio
 	end
 
 	-- Eyes Open!
-
-	self._eyes_open_t = self._eyes_open_t or t + (tweak_data.upgrades.crew_dodge_metre_fill_t or 1)
-	if self._eyes_open_t <= t then
-		self._eyes_open_t = t + (tweak_data.upgrades.crew_dodge_metre_fill_t or 1)
-		local linchpin_dodge_meter_bonus = managers.player:team_upgrade_value("player", "linchpin_crew_dodge_metre_fill", 0) + managers.player:team_upgrade_value("player", "linchpin_crew_dodge_metre_fill_2", 0)
-		self:fill_dodge_meter(self._dodge_points * dt * linchpin_dodge_meter_bonus)
-	end
+	-- **Currently unused,** probably not gonna be used again? But still, keeping it here just in case.
+	-- self._eyes_open_t = self._eyes_open_t or t + (tweak_data.upgrades.crew_dodge_metre_fill_t or 1)
+	-- if self._eyes_open_t <= t then
+	-- 	self._eyes_open_t = t + (tweak_data.upgrades.crew_dodge_metre_fill_t or 1)
+	-- 	local linchpin_dodge_meter_bonus = managers.player:team_upgrade_value("player", "linchpin_crew_dodge_metre_fill", 0) + managers.player:team_upgrade_value("player", "linchpin_crew_dodge_metre_fill_2", 0)
+	-- 	self:fill_dodge_meter(self._dodge_points * dt * linchpin_dodge_meter_bonus)
+	-- end
 
 	-- Dig In Your Heels! healing.
 	-- Yes, I know heal-over-time has its own function, but again, seems risky to overwrite.
@@ -144,8 +142,7 @@ function PlayerDamage:_update_regenerate_timer(t, dt)
 	orig_update_regenerate_timer(self, t, dt)
 
 	if managers.player:has_team_category_upgrade("player", "linchpin_armour_regen_bonus") then
-		local cohesion_stacks = managers.player:get_cohesion_stacks_as_treated()
-		local cohesion_steps = managers.player:get_cohesion_step(cohesion_stacks)
+		local cohesion_steps = managers.player:get_cohesion_stacks_as_treated()
 		local extra_regen_timer_tick = managers.player:team_upgrade_value("player", "linchpin_armour_regen_bonus", 0) * cohesion_steps
 		local regenerate_timer_tick = dt * (self._regenerate_speed or 1) * extra_regen_timer_tick
 		self._regenerate_timer = math.max(self._regenerate_timer - regenerate_timer_tick, 0)

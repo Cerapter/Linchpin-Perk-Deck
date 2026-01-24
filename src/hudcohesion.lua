@@ -16,7 +16,7 @@ function HUDCohesionDisplay:init(hud)
 		y = 0
 	})
     local skill_icon = self._cohesion_panel:bitmap({
-		texture = "guis/textures/pd2/skilltree/info_long_dis_revive", -- TODO Change this
+		texture = "guis/textures/pd2/skilltree/info_cohesion_display",
 		name = "cohesion_icon",
 		layer = 2,
 		render_template = "VertexColorTexturedRadial",
@@ -90,13 +90,6 @@ function HUDCohesionDisplay:set_cohesion_value(new_amount, extra)
 	else
 		self._cohesion_panel:child("cohesion_extra_stacks"):set_text('')
 	end
-
-    -- local filled = math.floor(self.cohesion_count / (tweak_data.upgrades.linchpin_per_crew_member or 1))
-    -- local partial = self.cohesion_count - filled * (tweak_data.upgrades.linchpin_per_crew_member or 1)
-    -- local ratio = partial / (tweak_data.upgrades.linchpin_per_crew_member or 1)
-
-    -- self._cohesion_panel:child("cohesion_stacks"):set_text(tostring(filled))
-    -- self._cohesion_panel:child("cohesion_back"):set_color(Color(0.75, ratio, 1, 1))
 end
 
 

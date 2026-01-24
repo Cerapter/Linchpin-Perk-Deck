@@ -1,3 +1,11 @@
+Version 1.3:
+- Reworked how data is synchronised over network (from doing network tweaks to leaning on SuperBLT's NetworkHelper) so maybe-hopefully clients without the mod won't crash or hang when syncing.
+- Added an Options menu that allows you to determine where the Cohesion Display should appear.
+- Changed the Cohesion Display's icon.
+- Added an option to the above that allows you to show how many actual heisters are there around (i.e., not counting converts) in ResMod's Buff Tracker.
+- Fixed an issue where AI heisters counted as converted enemies for the purposes of determining Cohesion stack tendency.
+- Fixed a bug where peers would check for the *sender* being affected by the sender's Linchpin proximity, not themselves.
+
 Version 1.2:
 - Actually send over to other peers when they should nullify their tendency numbers because they left a Linchpin's proximity. Oops!
 - Fixed a few issues where players joining midgame could have their Cohesion stacks updated even before they actually have Cohesion stacks.

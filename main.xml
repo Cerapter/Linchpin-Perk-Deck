@@ -1,4 +1,4 @@
-<mod name="Linchpin Perk Deck" author="Cerapter">
+<mod name="LinchpinPerkDeck" author="Cerapter" global_key="linchpin_perk_deck" core_class="Core.lua">
 	<Localization directory="localisation" default="english.json">
 		<loc file="english.json" language="english" />
 	</Localization>
@@ -7,8 +7,17 @@
 		<hook file="tweakdata.lua" source_file="lib/tweak_data/tweakdata"/>
 		<hook file="localisation.lua" source_file="lib/managers/localizationmanager"/>
 	</Hooks>
+
+	<Options name="Options" auto_build_menu="true" auto_load="true" save_file="linchpin_perk_deck.txt">
+		<options>
+			<option type="multichoice" default_value="1" name="Info_cohesion_display" values_tbl="linchpin_perk_deck.cohesion_display"/>
+			<option type="bool" default_value="false" name="Info_heisters_in_aura"/>
+		</options>
+	</Options>
 	
 	<AddFiles directory="assets">
 		<texture path="guis/dlcs/linchpin/textures/pd2/specialization/icons_atlas"/>
+		<texture path="guis/textures/pd2/skilltree/info_heisters_in_aura"/>
+		<texture path="guis/textures/pd2/skilltree/info_cohesion_display"/>
 	</AddFiles>
 </mod>

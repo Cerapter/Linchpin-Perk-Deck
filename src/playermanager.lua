@@ -7,6 +7,9 @@ if not restoration then
 	return
 end
 
+-- God I wish I didn't have to reimplement fucking (de)serialisation myself.
+dofile(ModPath .. 'src/utils.lua')
+
 Hooks:PostHook(PlayerManager, "_setup", "linchpin_playermanager_setup", function(self)
 	--- @type table<integer, SyncedLinchpinAuraData>
 	Global.player_manager.synced_cohesion_stacks = {}
@@ -128,7 +131,16 @@ function PlayerManager:_linchpin_on_personal_kill(_, _, _)
 	local player_unit = self:player_unit()
 	if self._num_kills % self._linchpin_personal_target_kills == 0 and player_unit ~= nil then
 		local affected_players = self:get_linchpin_aura_affected(player_unit:position())
-		managers.network:session():send_to_peers_synched("sync_add_cohesion_stacks", self._linchpin_personal_target_rewards, false,  self:pack_linchpin_affected_peer_set(affected_players))
+
+
+		---@type NetworkedLinchpinOthersDataUpdate
+		local packedData = {
+			amount = self._linchpin_personal_target_rewards,
+			go_over_tendency = false,
+			affected = affected_players
+		}
+		NetworkHelper:SendToPeers(LinchpinUtils.LINCHPIN_MESSAGE_ADD_STACKS, LinchpinUtils:serialise(packedData))
+
 		managers.player:add_cohesion_stacks(self._linchpin_personal_target_rewards, false)
 	end
 end
@@ -137,7 +149,15 @@ function PlayerManager:_linchpin_on_crew_kill(_, _, _)
 	local player_unit = self:player_unit()
 	if self._num_kills % self._linchpin_crew_target_kills == 0 and player_unit ~= nil then
 		local affected_players = self:get_linchpin_aura_affected(player_unit:position())
-		managers.network:session():send_to_peers_synched("sync_add_cohesion_stacks", self._linchpin_crew_target_rewards, true, self:pack_linchpin_affected_peer_set(affected_players))
+
+		---@type NetworkedLinchpinOthersDataUpdate
+		local packedData = {
+			amount = self._linchpin_crew_target_rewards,
+			go_over_tendency = true,
+			affected = affected_players
+		}
+		NetworkHelper:SendToPeers(LinchpinUtils.LINCHPIN_MESSAGE_ADD_STACKS, LinchpinUtils:serialise(packedData))
+
 		managers.player:add_cohesion_stacks(self._linchpin_crew_target_rewards, true)
 	end
 end
@@ -238,10 +258,19 @@ function PlayerManager:update_cohesion_stacks_for_peers(data, affected, change_t
 	local peer = managers.network:session():local_peer()
 	local is_affected = false
 	if peer then 
-    	is_affected = affected[peer:id()] ~= nil
+		is_affected = affected[peer:id()] ~= nil
 	end
 
-	managers.network:session():send_to_peers_synched("sync_cohesion_stacks", data.amount, data.to_tend, self:pack_linchpin_affected_peer_set(affected), change_tendency)
+
+	---@type NetworkedLinchpinSelfDataUpdate
+	local packedData = {
+		amount = data.amount,
+		to_tend = data.to_tend,
+		affected = affected,
+		change_tendency = change_tendency
+	}
+	NetworkHelper:SendToPeers(LinchpinUtils.LINCHPIN_MESSAGE_SYNC_STACKS, LinchpinUtils:serialise(packedData))
+
 	self:set_synced_cohesion_stacks(peer:id(), data, is_affected, change_tendency)
 end
 
@@ -271,20 +300,22 @@ function PlayerManager:add_cohesion_stacks(amount, go_over_tendency)
 	end
 end
 
----comment
----@param position any
----@return table
----@return number
+---  Calculates how many valid crew members are around a given position.
+--- @param position Vector3 I'm not sure about this, but I also don't care, I'm just passing it along to World:find_units_quick().
+--- @return table<integer,boolean> affected_players A table where all affected players' peer IDs are keys. Values are just true, but they shouldn't matter.
+--- @return integer heister_count The amount of non-convert heisters.
+--- @return integer convert_count The amount of converted enemies.
 function PlayerManager:get_linchpin_aura_affected(position)
 	local affected_players = {}
-	local all_heister_count = 0
+	local heister_count = 0
+	local convert_count = 0
 	local heisters = World:find_units_quick("sphere", position,
 		tweak_data.upgrades.linchpin_proximity or 0, managers.slot:get_mask("all_criminals"))
 	for i, unit in ipairs(heisters) do
-		if unit:slot() == 16 then
-			all_heister_count = all_heister_count + 0.5
+		if unit:slot() == 16 and  managers.groupai and not managers.groupai:state():is_unit_team_AI(unit) then
+			convert_count = convert_count + 1
 		else
-			all_heister_count = all_heister_count + 1
+			heister_count = heister_count + 1
 		end
 		if managers.network:session():peer_by_unit(unit) then
 			local tagged_id = managers.network:session():peer_by_unit(unit):id()
@@ -292,7 +323,7 @@ function PlayerManager:get_linchpin_aura_affected(position)
 		end
 	end
 
-	return affected_players, all_heister_count
+	return affected_players, heister_count, convert_count
 end
 
 --- Handles manipulating the Cohesion stack count.
@@ -330,9 +361,17 @@ function PlayerManager:update_cohesion_stacks(t, dt)
 
 	-- Linchpin users get to update their "suggested" tendency.
 	if self:upgrade_value("player", "linchpin_emit_aura", 0) ~= 0 then
-		local affected_count = 0
-		affected_players, affected_count = self:get_linchpin_aura_affected(player_unit:position())
-		local tendency_from_proximity = math.min(affected_count, tweak_data.upgrades.linchpin_hard_limit) * (tweak_data.upgrades.linchpin_per_crew_member or 0)
+		local heisters_affected = 0
+		local converts_affected = 0
+		affected_players, heisters_affected, converts_affected = self:get_linchpin_aura_affected(player_unit:position())
+
+		if managers and managers.hud then
+			managers.hud:linchpin_add_skill("heisters_in_aura")
+			managers.hud:linchpin_set_stacks("heisters_in_aura", heisters_affected)
+		end
+
+		local tendency_from_proximity = math.min(heisters_affected + converts_affected / 2, tweak_data.upgrades.linchpin_hard_limit) * (tweak_data.upgrades.linchpin_per_crew_member or 0)
+
 		local is_downed = game_state_machine:verify_game_state(GameStateFilters.downed)
 		new_to_tend = is_downed and 0 or (tendency_from_proximity + self:team_upgrade_value("player", "linchpin_increase_default_tendency", 0))
 	end
@@ -358,3 +397,57 @@ function PlayerManager:update_cohesion_stacks(t, dt)
 		}, affected_players, true)
 	end
 end
+
+-- This is effectively an implementation taken over from when I was using UnitNetworkHandler.
+-- I thiiiiink this should work? From what I've been able to gather of SuperBLT, I should be able to send and receive messages relatively freely.
+-- Anyway:
+--- @param packed_data string Should be a serialised NetworkedLinchpinSelfDataUpdate.
+---@param sender integer The sender peer's ID.
+NetworkHelper:AddReceiveHook(LinchpinUtils.LINCHPIN_MESSAGE_SYNC_STACKS, "sync_stack_message", function(packed_data, sender)
+	local local_peer = managers.network:session():local_peer()
+
+	if not BaseNetworkHandler._verify_gamestate(BaseNetworkHandler._gamestate_filter.any_ingame) and not local_peer then 
+		return
+	end
+
+	---@type NetworkedLinchpinSelfDataUpdate
+	---@diagnostic disable-next-line: assign-type-mismatch
+	local deseralised_data = LinchpinUtils:deserialise(packed_data)
+
+    local checked_cohesion_data = {
+        amount = deseralised_data and deseralised_data.amount or 0,
+        to_tend = deseralised_data and deseralised_data.to_tend or 0
+    }
+
+	local affected_peers = deseralised_data and deseralised_data.affected or {}
+    local is_affected = affected_peers[local_peer:id()] ~= nil
+	local change_tendency = deseralised_data and deseralised_data.change_tendency or false
+
+	managers.player:set_synced_cohesion_stacks(sender, checked_cohesion_data, is_affected, change_tendency)
+end)
+
+---@param packed_data string Should be a serialised NetworkedLinchpinOthersDataUpdate.
+---@param sender integer The sender peer's ID.
+NetworkHelper:AddReceiveHook(LinchpinUtils.LINCHPIN_MESSAGE_ADD_STACKS, "add_stack_message", function(packed_data, sender)
+	local local_peer = managers.network:session():local_peer()
+
+	if not BaseNetworkHandler._verify_gamestate(BaseNetworkHandler._gamestate_filter.any_ingame) and not local_peer then 
+		return
+	end
+
+	---@type NetworkedLinchpinOthersDataUpdate
+	---@diagnostic disable-next-line: assign-type-mismatch
+	local deseralised_data = LinchpinUtils:deserialise(packed_data)
+
+    local checked_cohesion_data = {
+        amount = deseralised_data and deseralised_data.amount or 0,
+        go_over_tendency = deseralised_data and deseralised_data.go_over_tendency or 0
+    }
+
+	local affected_peers = deseralised_data and deseralised_data.affected or {}
+    local is_affected = affected_peers[local_peer:id()] ~= nil
+	
+	if  is_affected then
+		managers.player:add_cohesion_stacks(checked_cohesion_data.amount, checked_cohesion_data.go_over_tendency)
+	end
+end)
